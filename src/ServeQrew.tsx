@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, type Variants, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import logo from './assets/logo.jpeg'; 
 import primegadgets from './assets/primegadgets.jpeg';
