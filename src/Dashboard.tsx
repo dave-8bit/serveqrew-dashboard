@@ -1,4 +1,5 @@
 // src/Dashboard.tsx
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Copy, Home, Users, Trophy, Share2, Sparkles } from 'lucide-react';
