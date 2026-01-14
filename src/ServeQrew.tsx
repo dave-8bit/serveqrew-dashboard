@@ -80,7 +80,7 @@ const ServeQrew: React.FC<ServeQrewProps> = ({ onNavigate }) => {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const res = await fetch('https://serveqrew.org/leaderboard');
+        const res = await fetch('https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/leaderboard');
         const data = await res.json();
         setLeaderboard(data.topReferrers || []);
       } catch (err) {
@@ -91,8 +91,7 @@ const ServeQrew: React.FC<ServeQrewProps> = ({ onNavigate }) => {
     const interval = setInterval(fetchLeaderboard, 30000); 
     return () => clearInterval(interval);
   }, []);
-
-  const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
+const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setWaitlistStatus(null);
 
@@ -102,7 +101,8 @@ const ServeQrew: React.FC<ServeQrewProps> = ({ onNavigate }) => {
     const brand_name = (form.elements.namedItem('brand_name') as HTMLInputElement)?.value.trim();
     
     try {
-      const res = await fetch('https://serveqrew.org/join-waitlist', {
+      // Fixed the double {{ and closed the function properly
+      const res = await fetch('https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/join', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ full_name, email, brand_name })
@@ -111,24 +111,19 @@ const ServeQrew: React.FC<ServeQrewProps> = ({ onNavigate }) => {
       const data = await res.json();
 
       if (res.ok) {
-        setWaitlistStatus({ type: 'success', message: data.message });
-        form.reset();
-        
-        // SUCCESS: Capture referralCode and unlock dashboard after 1.5s
+        setWaitlistStatus({ type: 'success', message: 'Welcome to the Qrew!' });
+        // If your backend returns a referral code, navigate to dashboard
         if (data.referralCode) {
-          setTimeout(() => {
-            onNavigate(data.referralCode);
-          }, 1500);
+          onNavigate(data.referralCode);
         }
       } else {
-        setWaitlistStatus({ type: 'error', message: data.message || 'Something went wrong' });
+        setWaitlistStatus({ type: 'error', message: data.error || 'Something went wrong' });
       }
-    } catch (err) {
-      console.error(err);
-      setWaitlistStatus({ type: 'error', message: 'Network error. Please try again.' });
-    }
+ } catch (err) {
+  console.error("Join error:", err);
+  setWaitlistStatus({ type: 'error', message: 'Failed to connect to server' });
+}
   };
-
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => setMousePos({ x: e.clientX, y: e.clientY });
     window.addEventListener('mousemove', handleMouseMove);
