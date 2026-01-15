@@ -81,16 +81,17 @@ const ServeQrew: React.FC<ServeQrewProps> = ({ onNavigate }) => {
   const waitlistRef = useRef<HTMLDivElement>(null);
 
 useEffect(() => {
-    const fetchLeaderboard = async () => {
-      try {
-        const res = await fetch('https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/leaderboard', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            // Accesses the key from your .env file
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-          }
-        });
+   const fetchLeaderboard = async () => {
+  try {
+    const res = await fetch('https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/leaderboard', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+      }
+    });
+  
         
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         

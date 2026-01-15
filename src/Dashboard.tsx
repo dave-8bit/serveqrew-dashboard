@@ -65,15 +65,16 @@ const Dashboard = ({ referralCode }: { referralCode: string }) => {
     let isMounted = true;
 
     const fetchDashboardData = async () => {
-      try {
-        const res = await fetch(`https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/dashboard?code=${referralCode}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            // Accesses the key from your .env file
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-          }
-        });
+  try {
+    const res = await fetch(`https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/dashboard?code=${referralCode}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+      }
+    });
+    
 
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
