@@ -61,50 +61,58 @@ const Dashboard = ({ referralCode }: { referralCode: string }) => {
       duration: 6 + Math.random() * 4
     }))
   );// ----------- POLLING DASHBOARD DATA WITH REFERRALS -----------
-  useEffect(() => {
-    let isMounted = true;
+ useEffect(() => {
+  let isMounted = true;
 const fetchDashboardData = async () => {
   try {
-    const res = await fetch(`https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/dashboard?code=${referralCode}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+    const res = await fetch(
+      `https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/dashboard?code=${referralCode}`,
+      {
+        // CHANGED: method is now 'GET' to match the URL parameters
+        method: 'GET', 
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
       }
-    });
+    );
 
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    const data = await res.json();
-  
-        if (isMounted) {
-          setUserData({
-            name: data.name,
-            email: data.email,
-            referralLink: data.referralLink,
-            referrals: data.referrals,
-            rank: data.rank,
-            referralList: data.referralList || [],
-          });
-        }
-      } catch (err) {
-        console.error('Error fetching dashboard data:', err);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
 
-    fetchDashboardData(); // initial fetch
+    const data: {
+      name: string;
+      email: string;
+      referralLink: string;
+      referrals: number;
+      rank: number;
+      referralList?: Array<{ name: string; email: string }>;
+    } = await res.json();
 
-    const interval = setInterval(() => {
-      fetchDashboardData();
-    }, 5000); // poll every 5 seconds
+    if (isMounted) {
+      setUserData({
+        name: data.name,
+        email: data.email,
+        referralLink: data.referralLink,
+        referrals: data.referrals,
+        rank: data.rank,
+        referralList: data.referralList || [],
+      });
+    }
+  } catch (err: unknown) {
+    console.error('Error fetching dashboard data:', err);
+  } finally {
+    if (isMounted) setLoading(false);
+  }
+};
+  fetchDashboardData(); // initial fetch
 
-    return () => {
-      isMounted = false;
-      clearInterval(interval);
-    };
-  }, [referralCode]);
+  const interval = setInterval(fetchDashboardData, 5000); // poll every 5s
+  return () => {
+    isMounted = false;
+    clearInterval(interval);
+  };
+}, [referralCode]);
 
   const copyLink = () => {
     if (userData.referralLink) {

@@ -79,88 +79,97 @@ const ServeQrew: React.FC<ServeQrewProps> = ({ onNavigate }) => {
   const [leaderboard, setLeaderboard] = useState<{name: string, referrals: number}[]>([]);
 
   const waitlistRef = useRef<HTMLDivElement>(null);
-
 useEffect(() => {
   const fetchLeaderboard = async () => {
-  try {
-    const res = await fetch('https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/leaderboard', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        // This references your .env and Vercel settings
-        'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+    try {
+      const res = await fetch(
+        // UPDATED: Added /leaderboard to the end of the URL
+        'https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/leaderboard',
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
+      const data = await res.json();
+      console.log('Leaderboard raw data:', data);
+
+      // Backend sends { topReferrers: [...] }
+      if (data.topReferrers && Array.isArray(data.topReferrers)) {
+        setLeaderboard(data.topReferrers);
+      } 
+      else if (data.data && Array.isArray(data.data)) {
+        setLeaderboard(data.data);
+      } 
+      else {
+        setLeaderboard([]);
+        console.warn('Leaderboard response did not match expected structure.');
       }
-    });
-    
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    
-    const data = await res.json();
-    setLeaderboard(data.topReferrers || []);
-  } catch (err) {
-    console.error("Leaderboard fetch error:", err);
-  }
-};
-    fetchLeaderboard();
-    const interval = setInterval(fetchLeaderboard, 30000);
-    return () => clearInterval(interval);
-  }, []);
+
+    } catch (err: unknown) {
+      console.error('Leaderboard fetch error:', err);
+      setLeaderboard([]); 
+    }
+  };
+
+  fetchLeaderboard(); 
+  const interval = setInterval(fetchLeaderboard, 30000); 
+  return () => clearInterval(interval);
+}, []);
 
 const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
-  setWaitlistStatus(null);
+  setWaitlistStatus(null); // reset any previous messages
 
   const form = e.currentTarget;
-  const full_name =
-    (form.elements.namedItem('full_name') as HTMLInputElement | null)
-      ?.value.trim();
-  const email =
-    (form.elements.namedItem('email') as HTMLInputElement | null)
-      ?.value.trim();
-  const brand_name =
-    (form.elements.namedItem('brand_name') as HTMLInputElement | null)
-      ?.value.trim() || '';
-
-  if (!full_name || !email) {
-    setWaitlistStatus({ type: 'error', message: 'Please fill in all required fields' });
-    return;
-  }
+  const full_name = (form.elements.namedItem('full_name') as HTMLInputElement).value.trim();
+  const email = (form.elements.namedItem('email') as HTMLInputElement).value.trim();
+  const brand_name = (form.elements.namedItem('brand_name') as HTMLInputElement)?.value.trim();
 
   try {
     const res = await fetch(
-      'https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/join',
+      'https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker',
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({ full_name, email, brand_name }),
       }
     );
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(errorText || 'Request failed');
-    }
+    const data: { referralCode?: string; message?: string; error?: string } = await res.json();
 
-    let data: { referralCode?: string } | null = null;
-    const contentType = res.headers.get('content-type');
-    if (contentType?.includes('application/json')) {
-      data = (await res.json()) as { referralCode?: string };
+    if (res.status === 201) {
+      // Success
+      setWaitlistStatus({ type: 'success', message: data.message || 'Welcome to the Qrew!' });
+      if (data.referralCode) {
+        onNavigate(data.referralCode); // go to dashboard if referral code returned
+      }
+    } else if (res.status === 409) {
+      // Duplicate email
+      setWaitlistStatus({
+        type: 'error',
+        message: 'This email is already on the waitlist. Check your inbox for your referral link!',
+      });
+    } else {
+      // Any other server error
+      setWaitlistStatus({ type: 'error', message: data.error || 'Something went wrong' });
     }
-
-    setWaitlistStatus({ type: 'success', message: 'Welcome to the Qrew!' });
-
-    if (data?.referralCode) {
-      onNavigate(data.referralCode);
-    }
-  } catch (err: unknown) {
+  } catch (err) {
     console.error('Join error:', err);
     setWaitlistStatus({ type: 'error', message: 'Failed to connect to server' });
   }
 };
+
 
 
   useEffect(() => {
@@ -600,7 +609,7 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
         isDark ? 'bg-white/5 border-white/10' : 'bg-black/5 border-black/10'
       }`}
     >
-     <form className="flex flex-col gap-3 md:gap-4" onSubmit={joinWaitlist}>
+    <form className="flex flex-col gap-3 md:gap-4" onSubmit={joinWaitlist}>
   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
     <input
       name="full_name"
@@ -626,9 +635,10 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
     className="bg-transparent px-4 md:px-6 py-3 md:py-4 border rounded-xl md:rounded-2xl outline-none font-bold transition-all text-sm md:text-base"
   />
 
+  {/* Success / Error messages */}
   {waitlistStatus && (
     <p
-      className={`text-xs md:text-sm mt-2 text-center ${
+      className={`text-xs md:text-sm mt-2 text-center font-semibold ${
         waitlistStatus.type === 'success' ? 'text-lime-400' : 'text-red-400'
       }`}
     >
@@ -644,6 +654,7 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
     Join The Waitlist
   </button>
 </form>
+
 
     </motion.div>
   </div>
