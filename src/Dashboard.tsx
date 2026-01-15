@@ -68,7 +68,7 @@ const Dashboard = ({ referralCode }: { referralCode: string }) => {
 
     const fetchDashboardData = async () => {
       try {
-       const res = await fetch('https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/dashboard?code=${referralCode}');;
+        const res = await fetch(`https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/dashboard?code=${referralCode}`);
         const data = await res.json();
         if (isMounted) {
           setUserData({

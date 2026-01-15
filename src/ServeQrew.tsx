@@ -152,7 +152,7 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
   ];
 
   const collaborators = [
-    { name: 'Gadget Hub', img: primegadgets, desc: 'Premier hardware devices.' },
+    { name: 'Prime Gadgets', img: primegadgets, desc: 'Premier hardware devices.' },
     { name: 'Crypto Qrew', img: cryptoqrew, desc: 'Digital asset management.' },
     { name: 'Jessica', img: jessica, desc: 'Elite Visual Brand Identity.' },
     { name: 'Alex', img: alex, desc: 'Strategic Brand Consultancy.' },
@@ -187,82 +187,125 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
         ))}
       </div>
 
-      <nav className={`fixed top-0 w-full z-50 px-8 py-5 backdrop-blur-2xl border-b flex justify-between items-center ${isDark ? 'border-white/10' : 'border-black/10'}`}>
-        <div className="flex items-center gap-5">
-          <div className="relative w-16 h-16 p-[2px] rounded-2xl bg-white/10 overflow-hidden">
-            <motion.div animate={{ rotate: 360 }} transition={{ duration: 4, repeat: Infinity, ease: "linear" }} className="absolute inset-[-100%] bg-[conic-gradient(from_0deg,transparent_0%,transparent_70%,#14b8a6_100%)]" />
-            <div className="relative w-full h-full rounded-[14px] bg-black p-1 flex items-center justify-center z-10">
-              <img src={logo} alt="ServeQrew" className="w-full h-full object-contain" />
-            </div>
-          </div>
-          <div className={`hidden sm:flex flex-col border-l pl-5 ${isDark ? 'border-white/10' : 'border-black/10'}`}>
-            <h1 className="text-2xl font-black uppercase italic leading-none tracking-tighter">ServeQrew</h1>
-            <div className="flex items-center gap-3 mt-1">
-                <ShieldCheck className="w-3 h-3 text-teal-500" />
-                <span className={`text-[8px] font-mono uppercase tracking-widest ${isDark ? 'text-white/30' : 'text-black/30'}`}>LOC: {mousePos.x}, {mousePos.y}</span>
-            </div>
-          </div>
-        </div>
+      <nav className={`fixed top-0 w-full z-50 px-4 sm:px-8 py-3 sm:py-5 backdrop-blur-2xl border-b flex justify-between items-center ${isDark ? 'border-white/10' : 'border-black/10'}`}>
+  <div className="flex items-center gap-3 sm:gap-5">
+    {/* Logo Container: Scaled down on mobile (w-12 h-12) and original on desktop (sm:w-16 sm:h-16) */}
+    <div className="relative w-12 h-12 sm:w-16 sm:h-16 p-[2px] rounded-xl sm:rounded-2xl bg-white/10 overflow-hidden">
+      <motion.div 
+        animate={{ rotate: 360 }} 
+        transition={{ duration: 4, repeat: Infinity, ease: "linear" }} 
+        className="absolute inset-[-100%] bg-[conic-gradient(from_0deg,transparent_0%,transparent_70%,#14b8a6_100%)]" 
+      />
+      <div className="relative w-full h-full rounded-[10px] sm:rounded-[14px] bg-black p-1 flex items-center justify-center z-10">
+        <img src={logo} alt="ServeQrew" className="w-full h-full object-contain" />
+      </div>
+    </div>
 
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={scrollToWaitlist}
-            className={`hidden md:block px-6 py-2 rounded-xl text-xs font-black uppercase italic tracking-widest border transition-all ${isDark ? 'border-white/10 hover:border-teal-400 bg-white/5' : 'border-black/10 hover:border-teal-600 bg-black/5'}`}
-          >
-            Join The Waitlist
-          </button>
-          <button onClick={() => setIsDark(!isDark)} className={`p-3 rounded-2xl border transition-all ${isDark ? 'bg-white/5 border-white/10 hover:border-lime-400' : 'bg-black/5 border-black/10 hover:border-teal-600'}`}>
-            {isDark ? <Sun className="text-lime-400 w-6 h-6" /> : <Moon className="text-teal-600 w-6 h-6" />}
-          </button>
-        </div>
-      </nav>
+    {/* Text Section: Hidden on very small screens, appears at 'sm' breakpoint (640px+) */}
+    <div className={`hidden sm:flex flex-col border-l pl-5 ${isDark ? 'border-white/10' : 'border-black/10'}`}>
+      <h1 className="text-2xl font-black uppercase italic leading-none tracking-tighter">ServeQrew</h1>
+      <div className="flex items-center gap-3 mt-1">
+        <ShieldCheck className="w-3 h-3 text-teal-500" />
+        <span className={`text-[8px] font-mono uppercase tracking-widest ${isDark ? 'text-white/30' : 'text-black/30'}`}>
+          LOC: {mousePos.x}, {mousePos.y}
+        </span>
+      </div>
+    </div>
+  </div>
 
-      {/* --- HERO SECTION --- */}
-      <section className="relative z-10 pt-52 pb-40 px-6 text-center">
-        <div className="flex flex-wrap justify-center gap-4 mb-8">
+  <div className="flex items-center gap-2 sm:gap-4">
+    {/* Join Button: Stays hidden on mobile, appears on md (768px+) */}
+    <button 
+      onClick={scrollToWaitlist}
+      className={`hidden md:block px-6 py-2 rounded-xl text-xs font-black uppercase italic tracking-widest border transition-all ${isDark ? 'border-white/10 hover:border-teal-400 bg-white/5' : 'border-black/10 hover:border-teal-600 bg-black/5'}`}
+    >
+      Join The Waitlist
+    </button>
+    
+    {/* Theme Toggle: Slightly smaller on mobile (p-2) to save space */}
+    <button 
+      onClick={() => setIsDark(!isDark)} 
+      className={`p-2 sm:p-3 rounded-xl sm:rounded-2xl border transition-all ${isDark ? 'bg-white/5 border-white/10 hover:border-lime-400' : 'bg-black/5 border-black/10 hover:border-teal-600'}`}
+    >
+      {isDark ? <Sun className="text-lime-400 w-5 h-5 sm:w-6 sm:h-6" /> : <Moon className="text-teal-600 w-5 h-5 sm:w-6 sm:h-6" />}
+    </button>
+  </div>
+</nav>
+{/* --- HERO SECTION --- */}
+      {/* Reduced pt-52 to pt-32 on small mobile (sm:pt-52) so users see content faster */}
+      <section className="relative z-10 pt-32 sm:pt-52 pb-40 px-4 sm:px-6 text-center">
+        <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-8">
           {["Connect", "Chat", "Grow"].map((word, i) => (
-            <motion.h1 key={word} custom={i} variants={blink} initial="initial" animate="animate" className={`text-6xl md:text-9xl font-black tracking-tighter uppercase italic drop-shadow-2xl ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            <motion.h1 
+              key={word} 
+              custom={i} 
+              variants={blink} 
+              initial="initial" 
+              animate="animate" 
+              /* text-4xl for 320px screens, scaling up to 6xl on tablets, and 9xl on desktop */
+              className={`text-4xl sm:text-6xl md:text-9xl font-black tracking-tighter uppercase italic drop-shadow-2xl ${isDark ? 'text-white' : 'text-slate-900'}`}
+            >
               {word}<span className="text-lime-400">.</span>
             </motion.h1>
           ))}
         </div>
-        <p className={`text-xl font-bold italic uppercase tracking-widest opacity-50 ${isDark ? 'text-white' : 'text-black'}`}>The Service Exchange for the Bold.</p>
+        {/* Adjusted text-lg for mobile so it stays on fewer lines */}
+        <p className={`text-lg sm:text-xl font-bold italic uppercase tracking-widest opacity-50 ${isDark ? 'text-white' : 'text-black'}`}>
+          The Service Exchange for the Bold.
+        </p>
       </section>
-
-      {/* --- AMBASSADORS SECTION --- */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 py-32">
-        <h2 className={`text-5xl font-black uppercase italic tracking-tighter text-center mb-20 ${isDark ? 'text-white' : 'text-slate-900'}`}>Founding Ambassadors</h2>
-        <div className="grid md:grid-cols-2 gap-12">
+{/* --- AMBASSADORS SECTION --- */}
+      <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-32">
+        <h2 className={`text-3xl sm:text-5xl font-black uppercase italic tracking-tighter text-center mb-10 sm:mb-20 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+          Founding Ambassadors
+        </h2>
+        
+        {/* Changed grid-cols-2 to ensure they stay side-by-side even on the smallest mobile (320px) */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-12">
           {ambassadors.map((p) => (
             <TiltCard key={p.name} color={p.color} isDark={isDark}>
-              <div className="flex flex-col items-center">
-                <div className={`w-full aspect-[4/5] rounded-[40px] border mb-8 flex items-center justify-center relative overflow-hidden ${isDark ? 'bg-black/40 border-white/5' : 'bg-white/40 border-black/5'}`}>
+              <div className="flex flex-col items-center p-2 sm:p-0">
+                {/* Scaled down border radius and margins for mobile */}
+                <div className={`w-full aspect-[4/5] rounded-[20px] sm:rounded-[40px] border mb-4 sm:mb-8 flex items-center justify-center relative overflow-hidden ${isDark ? 'bg-black/40 border-white/5' : 'bg-white/40 border-black/5'}`}>
                    {p.img ? (
                      <img src={p.img} alt={p.name} className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" />
                    ) : (
-                     <span className={`font-black text-6xl italic uppercase opacity-10 rotate-12 ${isDark ? 'text-white' : 'text-black'}`}>ServeQrew</span>
+                     <span className={`font-black text-2xl sm:text-6xl italic uppercase opacity-10 rotate-12 ${isDark ? 'text-white' : 'text-black'}`}>ServeQrew</span>
                    )}
                 </div>
-                <div className="flex items-center gap-3 mb-2">
-                  <UserCheck className="w-6 h-6 text-lime-400" />
-                  <h3 className={`text-4xl font-black uppercase italic tracking-tighter ${isDark ? 'text-white' : 'text-slate-900'}`}>{p.name}</h3>
+                
+                <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-3 mb-1 sm:mb-2 text-center">
+                  <UserCheck className="w-4 h-4 sm:w-6 sm:h-6 text-lime-400" />
+                  {/* Reduced text size for mobile (text-xl) to prevent overlapping */}
+                  <h3 className={`text-lg sm:text-4xl font-black uppercase italic tracking-tighter leading-none ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    {p.name}
+                  </h3>
                 </div>
-                <span className="text-teal-400 font-black text-[10px] uppercase tracking-[0.4em] mb-4">{p.role}</span>
-                <p className={`text-center max-w-sm text-sm italic ${isDark ? 'text-white opacity-50' : 'text-slate-600'}`}>"{p.bio}"</p>
+
+                <span className="text-teal-400 font-black text-[7px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.4em] mb-2 sm:mb-4 text-center">
+                  {p.role}
+                </span>
+
+                {/* Bio is hidden or very small on mobile to save space and keep cards equal height */}
+                <p className={`text-center max-w-sm text-[10px] sm:text-sm italic line-clamp-2 sm:line-clamp-none ${isDark ? 'text-white opacity-50' : 'text-slate-600'}`}>
+                  "{p.bio}"
+                </p>
               </div>
             </TiltCard>
           ))}
         </div>
       </section>
 
-      {/* --- MOST TRUSTED BRANDS --- */}
-      <section className={`relative z-10 py-32 border-y transition-colors duration-1000 ${isDark ? 'bg-black/20 border-white/5' : 'bg-slate-50 border-black/5'}`}>
-        <div className="max-w-7xl mx-auto px-6 text-center">
+   {/* --- MOST TRUSTED BRANDS --- */}
+      {/* Adjusted py-32 to py-16 on mobile (sm:py-32) */}
+      <section className={`relative z-10 py-16 sm:py-32 border-y transition-colors duration-1000 ${isDark ? 'bg-black/20 border-white/5' : 'bg-slate-50 border-black/5'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <h2 className={`text-5xl md:text-6xl font-black uppercase italic tracking-tighter mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            {/* Scaled down text-3xl for mobile to fit on one/two lines */}
+            <h2 className={`text-3xl sm:text-5xl md:text-6xl font-black uppercase italic tracking-tighter mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
               Our Most <span className="text-teal-500">Trusted</span> Brands
             </h2>
-            <p className={`text-[10px] font-mono tracking-[0.5em] uppercase mb-20 ${isDark ? 'text-white/30' : 'text-black/30'}`}>
+            <p className={`text-[8px] sm:text-[10px] font-mono tracking-[0.3em] sm:tracking-[0.5em] uppercase mb-10 sm:mb-20 ${isDark ? 'text-white/30' : 'text-black/30'}`}>
               The Elite Partnership Network
             </p>
           </motion.div>
@@ -274,7 +317,8 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
             variants={{
               visible: { transition: { staggerChildren: 0.1 } }
             }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+            /* GRID CHANGE: grid-cols-3 for small mobile, md:grid-cols-2, lg:grid-cols-4 for desktop */
+            className="grid grid-cols-3 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-8"
           >
             {collaborators.map((collab, i) => (
               <motion.div 
@@ -286,41 +330,46 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
                 whileHover={{ y: -10 }} 
                 className="group relative"
               >
-                <div className="absolute inset-0 bg-teal-500/10 blur-[60px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                <div className="absolute inset-0 bg-teal-500/10 blur-[30px] sm:blur-[60px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                 
-                <div className={`relative h-full p-8 rounded-[40px] border backdrop-blur-md overflow-hidden transition-all duration-500 flex flex-col items-center justify-center
+                {/* Reduced padding (p-3 sm:p-8) and corner radius (rounded-2xl) for mobile grid */}
+                <div className={`relative h-full p-3 sm:p-8 rounded-2xl sm:rounded-[40px] border backdrop-blur-md overflow-hidden transition-all duration-500 flex flex-col items-center justify-center
                   ${isDark 
                     ? 'bg-white/[0.03] border-white/10 group-hover:border-teal-400/50 group-hover:bg-white/[0.05]' 
                     : 'bg-black/[0.02] border-black/5 group-hover:border-teal-600/50 group-hover:bg-black/[0.04]'}`}
                 >
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-teal-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute top-0 right-0 w-12 h-12 sm:w-24 sm:h-24 bg-gradient-to-bl from-teal-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                  <div className="relative w-24 h-24 mx-auto mb-6">
-                    <div className={`absolute inset-0 rounded-3xl animate-pulse blur-sm ${isDark ? 'bg-teal-400/20' : 'bg-teal-600/10'}`} />
-                    <div className={`relative w-full h-full rounded-3xl border-2 p-1 overflow-hidden transition-transform duration-500 group-hover:scale-110
+                  {/* Shrunk image container (w-12 h-12) for the 3-column layout */}
+                  <div className="relative w-12 h-12 sm:w-24 sm:h-24 mx-auto mb-3 sm:mb-6">
+                    <div className={`absolute inset-0 rounded-xl sm:rounded-3xl animate-pulse blur-[2px] sm:blur-sm ${isDark ? 'bg-teal-400/20' : 'bg-teal-600/10'}`} />
+                    <div className={`relative w-full h-full rounded-xl sm:rounded-3xl border p-0.5 sm:p-1 overflow-hidden transition-transform duration-500 group-hover:scale-110
                       ${isDark ? 'border-white/10 bg-black' : 'border-black/10 bg-white'}`}>
-                      <img src={collab.img} alt={collab.name} className="w-full h-full object-cover rounded-[20px]" />
+                      <img src={collab.img} alt={collab.name} className="w-full h-full object-cover rounded-lg sm:rounded-[20px]" />
                     </div>
                   </div>
 
-                  <h3 className={`text-xl font-black uppercase italic tracking-tighter transition-colors text-center ${collab.desc ? 'mb-2' : 'mb-0'}
+                  {/* Scaled down text size to text-[10px] for mobile */}
+                  <h3 className={`text-[10px] sm:text-xl font-black uppercase italic tracking-tighter transition-colors text-center ${collab.desc ? 'mb-1' : 'mb-0'}
                     ${isDark ? 'text-white group-hover:text-teal-400' : 'text-slate-900 group-hover:text-teal-600'}`}>
                     {collab.name}
                   </h3>
 
+                  {/* Hidden description on mobile to prevent cards from becoming too long in 3-column layout */}
                   {collab.desc && (
-                    <p className={`text-[10px] font-bold leading-relaxed italic text-center transition-opacity duration-500
+                    <p className={`hidden sm:block text-[10px] font-bold leading-relaxed italic text-center transition-opacity duration-500
                       ${isDark ? 'text-white/40 group-hover:text-white/70' : 'text-slate-500 group-hover:text-slate-700'}`}>
                       {collab.desc}
                     </p>
                   )}
 
-                  <div className="mt-6 flex justify-center">
-                    <div className={`h-[2px] w-8 rounded-full transition-all duration-500 group-hover:w-16 
+                  <div className="mt-3 sm:mt-6 flex justify-center">
+                    <div className={`h-[1px] sm:h-[2px] w-4 sm:w-8 rounded-full transition-all duration-500 group-hover:w-16 
                       ${isDark ? 'bg-teal-400/30 group-hover:bg-teal-400' : 'bg-teal-600/20 group-hover:bg-teal-600'}`} />
                   </div>
 
-                  <ExternalLink className={`absolute top-6 right-6 w-4 h-4 transition-all duration-500 
+                  {/* Shrunk the link icon for mobile */}
+                  <ExternalLink className={`absolute top-3 right-3 w-3 h-3 sm:w-4 sm:h-4 transition-all duration-500 
                     ${isDark ? 'text-white/10 group-hover:text-teal-400' : 'text-black/10 group-hover:text-teal-600'}`} />
                 </div>
               </motion.div>
@@ -329,216 +378,359 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
         </div>
       </section>
 {/* --- TOP 10 LEADERBOARD --- */}
-      <section className="relative z-20 py-32 max-w-6xl mx-auto px-6"> 
-        <motion.div     
-          initial={{ opacity: 0, y: 30 }}    
-          whileInView={{ opacity: 1, y: 0 }}    
-          viewport={{ once: true }}    
-          className="text-center mb-20"  
-        >    
-          <h2 className={`text-6xl font-black uppercase italic tracking-tighter mb-6 flex items-center justify-center gap-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>      
-            <Trophy className="w-12 h-12 text-lime-500" />
-            Live <span className="text-lime-500">Leaderboard</span>    
-          </h2>    
-          <p className={`text-lg font-mono uppercase tracking-widest opacity-60 ${isDark ? 'text-white' : 'text-black'}`}>      
-            Top 10 Most Active Referrers • Updates Live    
-          </p>  
-        </motion.div>  
+<section className="relative z-20 py-20 md:py-32 max-w-6xl mx-auto px-4 md:px-6">
+  <motion.div
+    initial={{ opacity: 0, y: 30 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    className="text-center mb-14 md:mb-20"
+  >
+    <h2
+      className={`text-3xl md:text-6xl font-black uppercase italic tracking-tighter mb-4 md:mb-6 flex items-center justify-center gap-2 md:gap-4 ${
+        isDark ? 'text-white' : 'text-slate-900'
+      }`}
+    >
+      <Trophy className="w-8 h-8 md:w-12 md:h-12 text-lime-500" />
+      Live <span className="text-lime-500">Leaderboard</span>
+    </h2>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {leaderboard.length > 0 ? (
-            leaderboard.map((user, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                className={`relative p-6 rounded-3xl border flex items-center justify-between overflow-hidden ${
-                  isDark ? 'bg-white/5 border-white/10' : 'bg-black/5 border-black/10'
-                }`}
-              >
-                {/* EARLY BIRD BADGE */}
-                {leaderboard.length < 3 && (
-                  <div className="absolute top-0 right-0 bg-lime-400 text-black text-[7px] font-black uppercase px-2 py-1 rounded-bl-lg tracking-tighter animate-pulse">
-                    Early Bird
-                  </div>
-                )}
+    <p
+      className={`text-xs md:text-lg font-mono uppercase tracking-widest opacity-60 ${
+        isDark ? 'text-white' : 'text-black'
+      }`}
+    >
+      Top 10 Most Active Referrers • Updates Live
+    </p>
+  </motion.div>
 
-                <div className="flex items-center gap-4">
-                  <span className="text-2xl font-black italic text-teal-500">#{index + 1}</span>
-                  <div className="flex flex-col">
-                    <span className={`font-black uppercase italic text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                      {user.name}
-                    </span>
-                    <span className="text-[10px] text-lime-500 font-mono uppercase tracking-widest">
-                      Verified Qrew
-                    </span>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <span className="block text-xl font-black italic">{user.referrals}</span>
-                  <span className="text-[8px] uppercase tracking-widest opacity-50">Refers</span>
-                </div>
-              </motion.div>
-            ))
-          ) : (
-            <div className="col-span-full py-10 text-center">
-              <p className="opacity-50 italic mb-4 text-white">The ranks are currently empty...</p>
-              <p className="text-lime-400 font-black uppercase text-sm animate-bounce tracking-widest">
-                Be the first to join the legend!
-              </p>
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+    {leaderboard.length > 0 ? (
+      leaderboard.map((user, index) => (
+        <motion.div
+          key={index}
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          className={`relative p-4 md:p-6 rounded-3xl border flex items-center justify-between overflow-hidden ${
+            isDark ? 'bg-white/5 border-white/10' : 'bg-black/5 border-black/10'
+          }`}
+        >
+          {/* EARLY BIRD BADGE */}
+          {leaderboard.length < 3 && (
+            <div className="absolute top-0 right-0 bg-lime-400 text-black text-[7px] font-black uppercase px-2 py-1 rounded-bl-lg tracking-tighter animate-pulse">
+              Early Bird
             </div>
           )}
-        </div>
-      </section>
 
-      {/* WAITLIST SECTION */}
-      <section ref={waitlistRef} id="waitlist-form" className="relative z-10 py-32 px-6 scroll-mt-32">
-        <div className="text-center mb-12">
-          <h2 className={`text-5xl font-black uppercase italic tracking-tighter mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>Join The Waitlist</h2>
-          <p className={`text-sm italic max-w-md mx-auto opacity-60 ${isDark ? 'text-white' : 'text-black'}`}>Secure your position in the network before we launch and trust me you don't want to miss.</p>
-        </div>
-        <div className="w-full max-w-2xl mx-auto">
-          <motion.div className={`relative p-6 border rounded-[40px] backdrop-blur-2xl shadow-2xl overflow-hidden transition-all duration-500 ${isDark ? 'bg-white/5 border-white/10' : 'bg-black/5 border-black/10'}`}>
-            <form className="flex flex-col gap-4" onSubmit={joinWaitlist}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input
-                  name="full_name"
-                  type="text"
-                  placeholder="Full Name"
-                  className="bg-transparent px-6 py-4 border rounded-2xl outline-none font-bold transition-all"
-                  required
-                />
-                <input
-                  name="email"
-                  type="email"
-                  placeholder="Email Address"
-                  className="bg-transparent px-6 py-4 border rounded-2xl outline-none font-bold transition-all"
-                  required
-                />
-              </div>
-              <input
-                name="brand_name"
-                type="text"
-                placeholder="Brand Name (Optional)"
-                className="bg-transparent px-6 py-4 border rounded-2xl outline-none font-bold transition-all"
-              />
+          <div className="flex items-center gap-3 md:gap-4">
+            <span className="text-lg md:text-2xl font-black italic text-teal-500">
+              #{index + 1}
+            </span>
 
-              {waitlistStatus && (
-                <p className={`text-sm mt-2 text-center ${waitlistStatus.type === 'success' ? 'text-lime-400' : 'text-red-400'}`}>
-                  {waitlistStatus.message}
-                </p>
-              )}
-
-              <button
-                type="submit"
-                className="w-full py-5 rounded-2xl font-black uppercase italic tracking-tighter bg-[#84CC16] text-black hover:bg-lime-400 transition-all flex items-center justify-center gap-3"
+            <div className="flex flex-col">
+              <span
+                className={`font-black uppercase italic text-xs md:text-sm ${
+                  isDark ? 'text-white' : 'text-slate-900'
+                }`}
               >
-                <Sparkles className="w-5 h-5" /> Join The Waitlist
-              </button>
-            </form>
-          </motion.div>
-        </div>
-      </section>
+                {user.name}
+              </span>
 
-      {/* --- FAQ SECTION --- */}
-      <section className="relative z-10 py-32 max-w-4xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className={`text-4xl font-black uppercase italic tracking-tighter ${isDark ? 'text-white' : 'text-slate-900'}`}>Information Protocol</h2>
-          <p className="text-teal-500 text-[10px] uppercase font-mono tracking-[0.3em] mt-2">Frequently Asked Questions</p>
-        </div>
-        <div className="space-y-4">
-          {faqs.map((faq, i) => (
-            <div key={i} className={`border rounded-3xl overflow-hidden backdrop-blur-sm transition-all duration-500 ${isDark ? 'border-white/10 bg-white/[0.02]' : 'border-black/10 bg-black/[0.02]'}`}>
-              <button onClick={() => setActiveFaq(activeFaq === i ? null : i)} className="w-full px-8 py-6 flex items-center justify-between text-left hover:bg-teal-500/5 transition-colors">
-                <span className={`text-lg font-black uppercase italic tracking-tighter ${isDark ? 'text-white' : 'text-slate-900'}`}>{faq.q}</span>
-                <motion.div animate={{ rotate: activeFaq === i ? 180 : 0 }} className="text-teal-500"><ChevronDown className="w-6 h-6" /></motion.div>
-              </button>
-              <AnimatePresence>
-                {activeFaq === i && (
-                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3 }}>
-                    <div className={`px-8 pb-6 text-sm italic leading-relaxed border-t pt-4 ${isDark ? 'border-white/5 text-white/50' : 'border-black/5 text-slate-600'}`}>{faq.a}</div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <span className="text-[9px] md:text-[10px] text-lime-500 font-mono uppercase tracking-widest">
+                Verified Qrew
+              </span>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* --- FOOTER --- */}
-      <footer className={`relative py-24 border-t overflow-hidden transition-colors duration-1000 ${isDark ? 'border-white/5 bg-black' : 'border-black/5 bg-slate-50'}`}>
-        <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-px ${isDark ? 'bg-gradient-to-r from-transparent via-teal-500/50 to-transparent' : 'bg-gradient-to-r from-transparent via-teal-600/30 to-transparent'}`} />
-        
-        <div className="max-w-7xl mx-auto px-6 flex flex-col items-center">
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="flex flex-col items-center gap-8"
-          >
-            <div className={`w-12 h-12 rounded-2xl border p-1 opacity-50 grayscale transition-all duration-700 ${isDark ? 'border-white/10 bg-white/5' : 'border-black/10 bg-black/5'}`}>
-              <img src={logo} alt="SD" className="w-full h-full object-contain" />
-            </div>
-
-            <div className="text-center space-y-2">
-              <h4 className={`text-[10px] md:text-xs font-mono tracking-[0.4em] uppercase font-black transition-colors ${isDark ? 'text-white/40 hover:text-teal-400' : 'text-black/40 hover:text-teal-600'}`}>
-                © 2026 <span className={isDark ? 'text-white' : 'text-black'}>ServeQrew</span>. 
-                <span className="hidden md:inline"> The future of professional services.</span>
-              </h4>
-              <p className={`md:hidden text-[8px] font-mono tracking-[0.2em] uppercase opacity-40 ${isDark ? 'text-white' : 'text-black'}`}>
-                The future of professional services.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-4 opacity-20">
-              <div className={`h-[1px] w-12 ${isDark ? 'bg-white' : 'bg-black'}`} />
-              <div className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
-              <div className={`h-[1px] w-12 ${isDark ? 'bg-white' : 'bg-black'}`} />
-            </div>
-
-            <p className={`text-[8px] font-mono tracking-[1.5em] uppercase pointer-events-none ${isDark ? 'text-teal-400/20' : 'text-teal-600/40'}`}>
-              End Stream
-            </p>
-          </motion.div>
-        </div>
-
-        <div className="absolute bottom-6 left-6 w-3 h-3 border-l border-b border-teal-500/20 md:block hidden" />
-        <div className="absolute bottom-6 right-6 w-3 h-3 border-r border-b border-teal-500/20 md:block hidden" />
-      </footer>
-
-      {/* --- FLOATING CONTACT STRIP --- */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1, duration: 0.6 }}
-        className={`fixed z-[60] bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:translate-x-0`}
-      >
-        <div
-          className={`flex items-center gap-3 px-4 py-3 rounded-2xl border backdrop-blur-xl shadow-lg
-          ${isDark ? 'bg-black/70 border-teal-500/40' : 'bg-white/90 border-teal-600/40'}`}
-        >
-          <span className="hidden md:inline text-[9px] font-mono uppercase tracking-[0.25em] text-teal-400">
-            Need to reach the Qrew?
-          </span>
-          <div className="flex items-center gap-2">
-            <a
-              href="tel:09112536022"
-              className="text-xs md:text-sm font-black uppercase italic tracking-[0.18em] px-3 py-1.5 rounded-xl bg-lime-400 text-black hover:bg-lime-300 transition-colors"
-            >
-              0911 253 6022
-            </a>
-            <a
-              href="tel:07084515746"
-              className={`text-xs md:text-sm font-black uppercase italic tracking-[0.18em] px-3 py-1.5 rounded-xl border
-              ${isDark ? 'border-teal-500/60 text-teal-300 hover:bg-teal-500/20' : 'border-teal-600/70 text-teal-700 hover:bg-teal-600/10'} transition-colors`}
-            >
-              0708 451 5746
-            </a>
           </div>
+
+          <div className="text-right">
+            <span className="block text-lg md:text-xl font-black italic">
+              {user.referrals}
+            </span>
+            <span className="text-[7px] md:text-[8px] uppercase tracking-widest opacity-50">
+              Refers
+            </span>
+          </div>
+        </motion.div>
+      ))
+    ) : (
+      <div className="col-span-full py-10 text-center">
+        <p className="opacity-50 italic mb-4 text-white text-sm">
+          The ranks are currently empty...
+        </p>
+        <p className="text-lime-400 font-black uppercase text-xs md:text-sm animate-bounce tracking-widest">
+          Be the first to join the legend!
+        </p>
+      </div>
+    )}
+  </div>
+</section>
+
+{/* WAITLIST SECTION */}
+<section
+  ref={waitlistRef}
+  id="waitlist-form"
+  className="relative z-10 py-20 md:py-32 px-4 md:px-6 scroll-mt-32"
+>
+  <div className="text-center mb-10 md:mb-12">
+    <h2
+      className={`text-3xl md:text-5xl font-black uppercase italic tracking-tighter mb-3 md:mb-4 ${
+        isDark ? 'text-white' : 'text-slate-900'
+      }`}
+    >
+      Join The Waitlist
+    </h2>
+
+    <p
+      className={`text-xs md:text-sm italic max-w-xs md:max-w-md mx-auto opacity-60 ${
+        isDark ? 'text-white' : 'text-black'
+      }`}
+    >
+      Secure your position in the network before we launch and trust me you
+      don't want to miss.
+    </p>
+  </div>
+
+  <div className="w-full max-w-md md:max-w-2xl mx-auto">
+    <motion.div
+      className={`relative p-4 md:p-6 border rounded-[28px] md:rounded-[40px] backdrop-blur-2xl shadow-2xl overflow-hidden transition-all duration-500 ${
+        isDark ? 'bg-white/5 border-white/10' : 'bg-black/5 border-black/10'
+      }`}
+    >
+      <form className="flex flex-col gap-3 md:gap-4" onSubmit={joinWaitlist}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+          <input
+            name="full_name"
+            type="text"
+            placeholder="Full Name"
+            className="bg-transparent px-4 md:px-6 py-3 md:py-4 border rounded-xl md:rounded-2xl outline-none font-bold transition-all text-sm md:text-base"
+            required
+          />
+
+          <input
+            name="email"
+            type="email"
+            placeholder="Email Address"
+            className="bg-transparent px-4 md:px-6 py-3 md:py-4 border rounded-xl md:rounded-2xl outline-none font-bold transition-all text-sm md:text-base"
+            required
+          />
         </div>
-      </motion.div>
+
+        <input
+          name="brand_name"
+          type="text"
+          placeholder="Brand Name (Optional)"
+          className="bg-transparent px-4 md:px-6 py-3 md:py-4 border rounded-xl md:rounded-2xl outline-none font-bold transition-all text-sm md:text-base"
+        />
+
+        {waitlistStatus && (
+          <p
+            className={`text-xs md:text-sm mt-2 text-center ${
+              waitlistStatus.type === 'success'
+                ? 'text-lime-400'
+                : 'text-red-400'
+            }`}
+          >
+            {waitlistStatus.message}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          className="w-full py-4 md:py-5 rounded-xl md:rounded-2xl font-black uppercase italic tracking-tighter bg-[#84CC16] text-black hover:bg-lime-400 transition-all flex items-center justify-center gap-2 md:gap-3 text-sm md:text-base"
+        >
+          <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
+          Join The Waitlist
+        </button>
+      </form>
+    </motion.div>
+  </div>
+</section>
+{/* --- FAQ SECTION --- */}
+<section className="relative z-10 py-20 md:py-32 max-w-4xl mx-auto px-4 md:px-6">
+  <div className="text-center mb-12 md:mb-16">
+    <h2
+      className={`text-2xl md:text-4xl font-black uppercase italic tracking-tighter ${
+        isDark ? 'text-white' : 'text-slate-900'
+      }`}
+    >
+      Information Protocol
+    </h2>
+
+    <p className="text-teal-500 text-[9px] md:text-[10px] uppercase font-mono tracking-[0.25em] md:tracking-[0.3em] mt-2">
+      Frequently Asked Questions
+    </p>
+  </div>
+
+  <div className="space-y-3 md:space-y-4">
+    {faqs.map((faq, i) => (
+      <div
+        key={i}
+        className={`border rounded-2xl md:rounded-3xl overflow-hidden backdrop-blur-sm transition-all duration-500 ${
+          isDark
+            ? 'border-white/10 bg-white/[0.02]'
+            : 'border-black/10 bg-black/[0.02]'
+        }`}
+      >
+        <button
+          onClick={() => setActiveFaq(activeFaq === i ? null : i)}
+          className="w-full px-4 md:px-8 py-4 md:py-6 flex items-center justify-between text-left hover:bg-teal-500/5 transition-colors gap-3"
+        >
+          <span
+            className={`text-sm md:text-lg font-black uppercase italic tracking-tighter ${
+              isDark ? 'text-white' : 'text-slate-900'
+            }`}
+          >
+            {faq.q}
+          </span>
+
+          <motion.div
+            animate={{ rotate: activeFaq === i ? 180 : 0 }}
+            className="text-teal-500 flex-shrink-0"
+          >
+            <ChevronDown className="w-4 h-4 md:w-6 md:h-6" />
+          </motion.div>
+        </button>
+
+        <AnimatePresence>
+          {activeFaq === i && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div
+                className={`px-4 md:px-8 pb-4 md:pb-6 text-xs md:text-sm italic leading-relaxed border-t pt-3 md:pt-4 ${
+                  isDark
+                    ? 'border-white/5 text-white/50'
+                    : 'border-black/5 text-slate-600'
+                }`}
+              >
+                {faq.a}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    ))}
+  </div>
+</section>
+{/* --- FOOTER --- */}
+<footer
+  className={`relative py-16 md:py-24 border-t overflow-hidden transition-colors duration-1000 ${
+    isDark ? 'border-white/5 bg-black' : 'border-black/5 bg-slate-50'
+  }`}
+>
+  <div
+    className={`absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-px ${
+      isDark
+        ? 'bg-gradient-to-r from-transparent via-teal-500/50 to-transparent'
+        : 'bg-gradient-to-r from-transparent via-teal-600/30 to-transparent'
+    }`}
+  />
+
+  <div className="max-w-7xl mx-auto px-4 md:px-6 flex flex-col items-center">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="flex flex-col items-center gap-6 md:gap-8"
+    >
+      <div
+        className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl border p-1 opacity-50 grayscale transition-all duration-700 ${
+          isDark ? 'border-white/10 bg-white/5' : 'border-black/10 bg-black/5'
+        }`}
+      >
+        <img src={logo} alt="SD" className="w-full h-full object-contain" />
+      </div>
+
+      <div className="text-center space-y-1 md:space-y-2">
+        <h4
+          className={`text-[9px] md:text-xs font-mono tracking-[0.35em] md:tracking-[0.4em] uppercase font-black transition-colors ${
+            isDark
+              ? 'text-white/40 hover:text-teal-400'
+              : 'text-black/40 hover:text-teal-600'
+          }`}
+        >
+          © 2026 <span className={isDark ? 'text-white' : 'text-black'}>ServeQrew</span>.
+          <span className="hidden md:inline">
+            {' '}
+            The future of professional services.
+          </span>
+        </h4>
+
+        <p
+          className={`md:hidden text-[8px] font-mono tracking-[0.2em] uppercase opacity-40 ${
+            isDark ? 'text-white' : 'text-black'
+          }`}
+        >
+          The future of professional services.
+        </p>
+      </div>
+
+      <div className="flex items-center gap-3 md:gap-4 opacity-20">
+        <div className={`h-[1px] w-10 md:w-12 ${isDark ? 'bg-white' : 'bg-black'}`} />
+        <div className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
+        <div className={`h-[1px] w-10 md:w-12 ${isDark ? 'bg-white' : 'bg-black'}`} />
+      </div>
+
+      <p
+        className={`text-[7px] md:text-[8px] font-mono tracking-[1.2em] md:tracking-[1.5em] uppercase pointer-events-none ${
+          isDark ? 'text-teal-400/20' : 'text-teal-600/40'
+        }`}
+      >
+        End Stream
+      </p>
+    </motion.div>
+  </div>
+
+  <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 w-3 h-3 border-l border-b border-teal-500/20 hidden md:block" />
+  <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6 w-3 h-3 border-r border-b border-teal-500/20 hidden md:block" />
+</footer>
+{/* --- FLOATING CONTACT STRIP --- */}
+<motion.div
+  initial={{ opacity: 0, y: 30 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: 1, duration: 0.6 }}
+  className="fixed z-[60] bottom-3 md:bottom-4 inset-x-0 md:inset-x-auto md:right-6 flex justify-center md:justify-end pointer-events-none"
+>
+  <div
+    className={`pointer-events-auto flex items-center gap-2 md:gap-3 px-3 md:px-4 py-3 rounded-2xl border backdrop-blur-xl shadow-lg
+    ${isDark ? 'bg-black/70 border-teal-500/40' : 'bg-white/90 border-teal-600/40'}`}
+  >
+    {/* MOBILE HELPER TEXT */}
+    <span className="md:hidden text-[8px] font-mono uppercase tracking-[0.18em] text-teal-400 opacity-70">
+      Tap any number to contact us
+    </span>
+
+    {/* DESKTOP TEXT (UNCHANGED) */}
+    <span className="hidden md:inline text-[9px] font-mono uppercase tracking-[0.25em] text-teal-400">
+      Need to reach the Qrew?
+    </span>
+
+    <div className="flex items-center gap-2 whitespace-nowrap">
+      <a
+        href="tel:09112536022"
+        className="text-[10px] md:text-sm font-black uppercase italic tracking-[0.16em] md:tracking-[0.18em] px-3 py-1.5 rounded-xl bg-lime-400 text-black hover:bg-lime-300 transition-colors"
+      >
+        0911 253 6022
+      </a>
+
+      <a
+        href="tel:07084515746"
+        className={`text-[10px] md:text-sm font-black uppercase italic tracking-[0.16em] md:tracking-[0.18em] px-3 py-1.5 rounded-xl border
+        ${
+          isDark
+            ? 'border-teal-500/60 text-teal-300 hover:bg-teal-500/20'
+            : 'border-teal-600/70 text-teal-700 hover:bg-teal-600/10'
+        } transition-colors`}
+      >
+        0708 451 5746
+      </a>
+    </div>
+  </div>
+</motion.div>
     </div>
   );
-};
+}
 
 export default ServeQrew;
