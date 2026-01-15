@@ -105,43 +105,64 @@ useEffect(() => {
     const interval = setInterval(fetchLeaderboard, 30000);
     return () => clearInterval(interval);
   }, []);
+
 const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setWaitlistStatus(null);
+  e.preventDefault();
+  setWaitlistStatus(null);
 
-    const form = e.currentTarget;
-    const full_name = (form.elements.namedItem('full_name') as HTMLInputElement).value.trim();
-    const email = (form.elements.namedItem('email') as HTMLInputElement).value.trim();
-    const brand_name = (form.elements.namedItem('brand_name') as HTMLInputElement)?.value.trim();
-    
-   try {
-const res = await fetch('https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/join', {
-  method: 'POST',
-  headers: { 
-    'Content-Type': 'application/json',
+  const form = e.currentTarget;
+  const full_name =
+    (form.elements.namedItem('full_name') as HTMLInputElement | null)
+      ?.value.trim();
+  const email =
+    (form.elements.namedItem('email') as HTMLInputElement | null)
+      ?.value.trim();
+  const brand_name =
+    (form.elements.namedItem('brand_name') as HTMLInputElement | null)
+      ?.value.trim() || '';
 
-    'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-    'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-  },
-  body: JSON.stringify({ full_name, email, brand_name })
-});
+  if (!full_name || !email) {
+    setWaitlistStatus({ type: 'error', message: 'Please fill in all required fields' });
+    return;
+  }
 
-      const data = await res.json();
-
-      if (res.ok) {
-        setWaitlistStatus({ type: 'success', message: 'Welcome to the Qrew!' });
-        // If your backend returns a referral code, navigate to dashboard
-        if (data.referralCode) {
-          onNavigate(data.referralCode);
-        }
-      } else {
-        setWaitlistStatus({ type: 'error', message: data.error || 'Something went wrong' });
+  try {
+    const res = await fetch(
+      'https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/join',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({ full_name, email, brand_name }),
       }
- } catch (err) {
-  console.error("Join error:", err);
-  setWaitlistStatus({ type: 'error', message: 'Failed to connect to server' });
-}
-  };
+    );
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(errorText || 'Request failed');
+    }
+
+    let data: { referralCode?: string } | null = null;
+    const contentType = res.headers.get('content-type');
+    if (contentType?.includes('application/json')) {
+      data = (await res.json()) as { referralCode?: string };
+    }
+
+    setWaitlistStatus({ type: 'success', message: 'Welcome to the Qrew!' });
+
+    if (data?.referralCode) {
+      onNavigate(data.referralCode);
+    }
+  } catch (err: unknown) {
+    console.error('Join error:', err);
+    setWaitlistStatus({ type: 'error', message: 'Failed to connect to server' });
+  }
+};
+
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => setMousePos({ x: e.clientX, y: e.clientY });
     window.addEventListener('mousemove', handleMouseMove);
@@ -548,6 +569,7 @@ const res = await fetch('https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/s
 </section>
 
 {/* WAITLIST SECTION */}
+{/* WAITLIST SECTION */}
 <section
   ref={waitlistRef}
   id="waitlist-form"
@@ -578,55 +600,55 @@ const res = await fetch('https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/s
         isDark ? 'bg-white/5 border-white/10' : 'bg-black/5 border-black/10'
       }`}
     >
-      <form className="flex flex-col gap-3 md:gap-4" onSubmit={joinWaitlist}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-          <input
-            name="full_name"
-            type="text"
-            placeholder="Full Name"
-            className="bg-transparent px-4 md:px-6 py-3 md:py-4 border rounded-xl md:rounded-2xl outline-none font-bold transition-all text-sm md:text-base"
-            required
-          />
+     <form className="flex flex-col gap-3 md:gap-4" onSubmit={joinWaitlist}>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+    <input
+      name="full_name"
+      type="text"
+      placeholder="Full Name"
+      className="bg-transparent px-4 md:px-6 py-3 md:py-4 border rounded-xl md:rounded-2xl outline-none font-bold transition-all text-sm md:text-base"
+      required
+    />
 
-          <input
-            name="email"
-            type="email"
-            placeholder="Email Address"
-            className="bg-transparent px-4 md:px-6 py-3 md:py-4 border rounded-xl md:rounded-2xl outline-none font-bold transition-all text-sm md:text-base"
-            required
-          />
-        </div>
+    <input
+      name="email"
+      type="email"
+      placeholder="Email Address"
+      className="bg-transparent px-4 md:px-6 py-3 md:py-4 border rounded-xl md:rounded-2xl outline-none font-bold transition-all text-sm md:text-base"
+      required
+    />
+  </div>
 
-        <input
-          name="brand_name"
-          type="text"
-          placeholder="Brand Name (Optional)"
-          className="bg-transparent px-4 md:px-6 py-3 md:py-4 border rounded-xl md:rounded-2xl outline-none font-bold transition-all text-sm md:text-base"
-        />
+  <input
+    name="brand_name"
+    type="text"
+    placeholder="Brand Name (Optional)"
+    className="bg-transparent px-4 md:px-6 py-3 md:py-4 border rounded-xl md:rounded-2xl outline-none font-bold transition-all text-sm md:text-base"
+  />
 
-        {waitlistStatus && (
-          <p
-            className={`text-xs md:text-sm mt-2 text-center ${
-              waitlistStatus.type === 'success'
-                ? 'text-lime-400'
-                : 'text-red-400'
-            }`}
-          >
-            {waitlistStatus.message}
-          </p>
-        )}
+  {waitlistStatus && (
+    <p
+      className={`text-xs md:text-sm mt-2 text-center ${
+        waitlistStatus.type === 'success' ? 'text-lime-400' : 'text-red-400'
+      }`}
+    >
+      {waitlistStatus.message}
+    </p>
+  )}
 
-        <button
-          type="submit"
-          className="w-full py-4 md:py-5 rounded-xl md:rounded-2xl font-black uppercase italic tracking-tighter bg-[#84CC16] text-black hover:bg-lime-400 transition-all flex items-center justify-center gap-2 md:gap-3 text-sm md:text-base"
-        >
-          <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
-          Join The Waitlist
-        </button>
-      </form>
+  <button
+    type="submit"
+    className="w-full py-4 md:py-5 rounded-xl md:rounded-2xl font-black uppercase italic tracking-tighter bg-[#84CC16] text-black hover:bg-lime-400 transition-all flex items-center justify-center gap-2 md:gap-3 text-sm md:text-base"
+  >
+    <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
+    Join The Waitlist
+  </button>
+</form>
+
     </motion.div>
   </div>
 </section>
+
 {/* --- FAQ SECTION --- */}
 <section className="relative z-10 py-20 md:py-32 max-w-4xl mx-auto px-4 md:px-6">
   <div className="text-center mb-12 md:mb-16">

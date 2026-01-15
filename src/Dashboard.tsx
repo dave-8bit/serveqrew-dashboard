@@ -76,8 +76,7 @@ const fetchDashboardData = async () => {
 
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const data = await res.json();
-    
-    // ... existing setUserData logic
+  
         if (isMounted) {
           setUserData({
             name: data.name,
