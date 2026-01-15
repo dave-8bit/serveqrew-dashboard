@@ -67,12 +67,11 @@ const Dashboard = ({ referralCode }: { referralCode: string }) => {
     const fetchDashboardData = async () => {
   try {
     const res = await fetch(`https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/dashboard?code=${referralCode}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-      }
+     headers: {
+  'Content-Type': 'application/json',
+  'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+  'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+}
     });
     
 
