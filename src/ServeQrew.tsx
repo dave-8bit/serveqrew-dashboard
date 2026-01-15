@@ -81,26 +81,26 @@ const ServeQrew: React.FC<ServeQrewProps> = ({ onNavigate }) => {
   const waitlistRef = useRef<HTMLDivElement>(null);
 
 useEffect(() => {
-   const fetchLeaderboard = async () => {
+  const fetchLeaderboard = async () => {
   try {
     const res = await fetch('https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/leaderboard', {
       method: 'GET',
-    headers: {
-  'Content-Type': 'application/json',
-  'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-  'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-}
-    });
-  
-        
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        
-        const data = await res.json();
-        setLeaderboard(data.topReferrers || []);
-      } catch (err) {
-        console.error("Leaderboard fetch error:", err);
+      headers: {
+        'Content-Type': 'application/json',
+        // This references your .env and Vercel settings
+        'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
       }
-    };
+    });
+    
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    
+    const data = await res.json();
+    setLeaderboard(data.topReferrers || []);
+  } catch (err) {
+    console.error("Leaderboard fetch error:", err);
+  }
+};
     fetchLeaderboard();
     const interval = setInterval(fetchLeaderboard, 30000);
     return () => clearInterval(interval);

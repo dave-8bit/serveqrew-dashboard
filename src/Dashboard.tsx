@@ -63,21 +63,21 @@ const Dashboard = ({ referralCode }: { referralCode: string }) => {
   );// ----------- POLLING DASHBOARD DATA WITH REFERRALS -----------
   useEffect(() => {
     let isMounted = true;
-
-    const fetchDashboardData = async () => {
+const fetchDashboardData = async () => {
   try {
     const res = await fetch(`https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/dashboard?code=${referralCode}`, {
-     headers: {
-  'Content-Type': 'application/json',
-  'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-  'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-}
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+      }
     });
+
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    const data = await res.json();
     
-
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-
-        const data = await res.json();
+    // ... existing setUserData logic
         if (isMounted) {
           setUserData({
             name: data.name,
