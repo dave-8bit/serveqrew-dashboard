@@ -115,14 +115,16 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
     const brand_name = (form.elements.namedItem('brand_name') as HTMLInputElement)?.value.trim();
     
    try {
-      const res = await fetch('https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/join', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-        },
-        body: JSON.stringify({ full_name, email, brand_name })
-      });
+const res = await fetch('https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/join', {
+  method: 'POST',
+  headers: { 
+    'Content-Type': 'application/json',
+
+    'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+    'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+  },
+  body: JSON.stringify({ full_name, email, brand_name })
+});
 
       const data = await res.json();
 
