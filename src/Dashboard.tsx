@@ -60,15 +60,23 @@ const Dashboard = ({ referralCode }: { referralCode: string }) => {
       delay: Math.random() * 5,
       duration: 6 + Math.random() * 4
     }))
-  );
-
-  // ----------- POLLING DASHBOARD DATA WITH REFERRALS -----------
+  );// ----------- POLLING DASHBOARD DATA WITH REFERRALS -----------
   useEffect(() => {
     let isMounted = true;
 
     const fetchDashboardData = async () => {
       try {
-        const res = await fetch(`https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/dashboard?code=${referralCode}`);
+        const res = await fetch(`https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/dashboard?code=${referralCode}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            // Accesses the key from your .env file
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+          }
+        });
+
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
         const data = await res.json();
         if (isMounted) {
           setUserData({

@@ -73,14 +73,27 @@ const ServeQrew: React.FC<ServeQrewProps> = ({ onNavigate }) => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [waitlistStatus, setWaitlistStatus] = useState<{type: 'success' | 'error', message: string} | null>(null);
+  const [expandedBrand, setExpandedBrand] = useState<number | null>(null);
+  const [expandedAmbassador, setExpandedAmbassador] = useState<number | null>(null); 
+      
   const [leaderboard, setLeaderboard] = useState<{name: string, referrals: number}[]>([]);
 
   const waitlistRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const res = await fetch('https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/leaderboard');
+        const res = await fetch('https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/leaderboard', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            // Accesses the key from your .env file
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+          }
+        });
+        
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        
         const data = await res.json();
         setLeaderboard(data.topReferrers || []);
       } catch (err) {
@@ -88,7 +101,7 @@ const ServeQrew: React.FC<ServeQrewProps> = ({ onNavigate }) => {
       }
     };
     fetchLeaderboard();
-    const interval = setInterval(fetchLeaderboard, 30000); 
+    const interval = setInterval(fetchLeaderboard, 30000);
     return () => clearInterval(interval);
   }, []);
 const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -100,11 +113,13 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
     const email = (form.elements.namedItem('email') as HTMLInputElement).value.trim();
     const brand_name = (form.elements.namedItem('brand_name') as HTMLInputElement)?.value.trim();
     
-    try {
-      // Fixed the double {{ and closed the function properly
+   try {
       const res = await fetch('https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/join', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+        },
         body: JSON.stringify({ full_name, email, brand_name })
       });
 
@@ -145,7 +160,7 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
 
   const faqs = [
     { q: "What exactly is ServeQrew?", a: "Think of it as a digital market. It’s where you go when you need a laundry guy, an online fragrance store, a web developer, or even a used textbook, basically any goods or service that you can think off." },
-    { q: "Do I have to be a student to use it?", a: "Our heart is in UNN for now as we have to start somewhere so students are our priority. However, anyone in Nigeria (lecturers, business owners, etc.) can buy or sell services!UNN is thre starting point!" },
+    { q: "Do I have to be a student to use it?", a: "Our heart is in UNN for now as we have to start somewhere so students are our priority. However, anyone in Nigeria (lecturers, business owners, etc.) can buy or sell services! UNN is the starting point!" },
     { q: "How do I get paid for my services?", a: "You search for a provider, chat with them directly on the app, and agree on terms. We are building secure ways to ensure everyone gets what they paid for and also maximum security of vital information." },
     { q: "Is my data safe?", a: "100%. We use modern security to keep your chats private. Plus, we verify users to keep the scammers out." },
     { q: "Why should I join the waitlist?", a: "Waitlist members get the ServeQrew badge, early access to the best deals especially from our collaborators, and a chance to use our premium features for free when we go live." }
@@ -254,18 +269,17 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
           The Service Exchange for the Bold.
         </p>
       </section>
-{/* --- AMBASSADORS SECTION --- */}
+
+
       <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-32">
         <h2 className={`text-3xl sm:text-5xl font-black uppercase italic tracking-tighter text-center mb-10 sm:mb-20 ${isDark ? 'text-white' : 'text-slate-900'}`}>
           Founding Ambassadors
         </h2>
         
-        {/* Changed grid-cols-2 to ensure they stay side-by-side even on the smallest mobile (320px) */}
         <div className="grid grid-cols-2 gap-3 sm:gap-12">
-          {ambassadors.map((p) => (
+          {ambassadors.map((p, idx) => (
             <TiltCard key={p.name} color={p.color} isDark={isDark}>
               <div className="flex flex-col items-center p-2 sm:p-0">
-                {/* Scaled down border radius and margins for mobile */}
                 <div className={`w-full aspect-[4/5] rounded-[20px] sm:rounded-[40px] border mb-4 sm:mb-8 flex items-center justify-center relative overflow-hidden ${isDark ? 'bg-black/40 border-white/5' : 'bg-white/40 border-black/5'}`}>
                    {p.img ? (
                      <img src={p.img} alt={p.name} className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" />
@@ -275,8 +289,7 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
                 </div>
                 
                 <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-3 mb-1 sm:mb-2 text-center">
-                  <UserCheck className="w-4 h-4 sm:w-6 sm:h-6 text-lime-400" />
-                  {/* Reduced text size for mobile (text-xl) to prevent overlapping */}
+                  <UserCheck className="w-4 h-4 sm:w-6 sm:h-6 text-lime-400 flex-shrink-0" />
                   <h3 className={`text-lg sm:text-4xl font-black uppercase italic tracking-tighter leading-none ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     {p.name}
                   </h3>
@@ -286,10 +299,45 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
                   {p.role}
                 </span>
 
-                {/* Bio is hidden or very small on mobile to save space and keep cards equal height */}
-                <p className={`text-center max-w-sm text-[10px] sm:text-sm italic line-clamp-2 sm:line-clamp-none ${isDark ? 'text-white opacity-50' : 'text-slate-600'}`}>
+                {/* Desktop: Full bio always visible */}
+                <p className={`hidden sm:block text-center max-w-sm text-sm italic ${isDark ? 'text-white opacity-50' : 'text-slate-600'}`}>
                   "{p.bio}"
                 </p>
+
+                {/* Mobile: Show first part of bio with line clamp */}
+                <p className={`sm:hidden text-center max-w-sm text-[10px] italic line-clamp-2 ${isDark ? 'text-white opacity-50' : 'text-slate-600'}`}>
+                  "{p.bio}"
+                </p>
+
+                {/* Mobile: Read More button */}
+                <button
+                  onClick={() => setExpandedAmbassador(expandedAmbassador === idx ? null : idx)}
+                  className={`sm:hidden text-[7px] font-black uppercase mt-2 px-2 py-0.5 rounded transition-colors ${
+                    expandedAmbassador === idx
+                      ? `${isDark ? 'bg-teal-500/30 text-teal-300' : 'bg-teal-600/20 text-teal-600'}`
+                      : `${isDark ? 'text-teal-400/60 hover:text-teal-400' : 'text-teal-600/60 hover:text-teal-600'}`
+                  }`}
+                >
+                  {expandedAmbassador === idx ? 'Read Less' : 'Read More'}
+                </button>
+
+                {/* Mobile: Expandable full bio */}
+                <AnimatePresence>
+                  {expandedAmbassador === idx && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="sm:hidden w-full mt-2 pt-2 border-t border-white/10"
+                    >
+                      <p className={`text-center text-[9px] italic leading-tight
+                        ${isDark ? 'text-white opacity-70' : 'text-slate-700'}`}>
+                        "{p.bio}"
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </TiltCard>
           ))}
@@ -298,10 +346,10 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
 
    {/* --- MOST TRUSTED BRANDS --- */}
       {/* Adjusted py-32 to py-16 on mobile (sm:py-32) */}
+     
       <section className={`relative z-10 py-16 sm:py-32 border-y transition-colors duration-1000 ${isDark ? 'bg-black/20 border-white/5' : 'bg-slate-50 border-black/5'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            {/* Scaled down text-3xl for mobile to fit on one/two lines */}
             <h2 className={`text-3xl sm:text-5xl md:text-6xl font-black uppercase italic tracking-tighter mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
               Our Most <span className="text-teal-500">Trusted</span> Brands
             </h2>
@@ -317,7 +365,6 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
             variants={{
               visible: { transition: { staggerChildren: 0.1 } }
             }}
-            /* GRID CHANGE: grid-cols-3 for small mobile, md:grid-cols-2, lg:grid-cols-4 for desktop */
             className="grid grid-cols-3 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-8"
           >
             {collaborators.map((collab, i) => (
@@ -332,7 +379,6 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
               >
                 <div className="absolute inset-0 bg-teal-500/10 blur-[30px] sm:blur-[60px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                 
-                {/* Reduced padding (p-3 sm:p-8) and corner radius (rounded-2xl) for mobile grid */}
                 <div className={`relative h-full p-3 sm:p-8 rounded-2xl sm:rounded-[40px] border backdrop-blur-md overflow-hidden transition-all duration-500 flex flex-col items-center justify-center
                   ${isDark 
                     ? 'bg-white/[0.03] border-white/10 group-hover:border-teal-400/50 group-hover:bg-white/[0.05]' 
@@ -340,7 +386,6 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
                 >
                   <div className="absolute top-0 right-0 w-12 h-12 sm:w-24 sm:h-24 bg-gradient-to-bl from-teal-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                  {/* Shrunk image container (w-12 h-12) for the 3-column layout */}
                   <div className="relative w-12 h-12 sm:w-24 sm:h-24 mx-auto mb-3 sm:mb-6">
                     <div className={`absolute inset-0 rounded-xl sm:rounded-3xl animate-pulse blur-[2px] sm:blur-sm ${isDark ? 'bg-teal-400/20' : 'bg-teal-600/10'}`} />
                     <div className={`relative w-full h-full rounded-xl sm:rounded-3xl border p-0.5 sm:p-1 overflow-hidden transition-transform duration-500 group-hover:scale-110
@@ -349,13 +394,12 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
                     </div>
                   </div>
 
-                  {/* Scaled down text size to text-[10px] for mobile */}
                   <h3 className={`text-[10px] sm:text-xl font-black uppercase italic tracking-tighter transition-colors text-center ${collab.desc ? 'mb-1' : 'mb-0'}
                     ${isDark ? 'text-white group-hover:text-teal-400' : 'text-slate-900 group-hover:text-teal-600'}`}>
                     {collab.name}
                   </h3>
 
-                  {/* Hidden description on mobile to prevent cards from becoming too long in 3-column layout */}
+                  {/* Desktop: Always visible description */}
                   {collab.desc && (
                     <p className={`hidden sm:block text-[10px] font-bold leading-relaxed italic text-center transition-opacity duration-500
                       ${isDark ? 'text-white/40 group-hover:text-white/70' : 'text-slate-500 group-hover:text-slate-700'}`}>
@@ -363,12 +407,43 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
                     </p>
                   )}
 
+                  {/* Mobile: Read More button */}
+                  {collab.desc && (
+                    <button
+                      onClick={() => setExpandedBrand(expandedBrand === i ? null : i)}
+                      className={`sm:hidden text-[7px] font-black uppercase mt-1 px-1.5 py-0.5 rounded transition-colors ${
+                        expandedBrand === i
+                          ? `${isDark ? 'bg-teal-500/30 text-teal-300' : 'bg-teal-600/20 text-teal-600'}`
+                          : `${isDark ? 'text-teal-400/60 hover:text-teal-400' : 'text-teal-600/60 hover:text-teal-600'}`
+                      }`}
+                    >
+                      {expandedBrand === i ? 'Hide' : 'More'}
+                    </button>
+                  )}
+
+                  {/* Mobile: Expandable description */}
+                  <AnimatePresence>
+                    {expandedBrand === i && collab.desc && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="sm:hidden w-full mt-2 pt-2 border-t border-white/10"
+                      >
+                        <p className={`text-[8px] font-bold leading-tight italic text-center
+                          ${isDark ? 'text-white/60' : 'text-slate-600'}`}>
+                          {collab.desc}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   <div className="mt-3 sm:mt-6 flex justify-center">
                     <div className={`h-[1px] sm:h-[2px] w-4 sm:w-8 rounded-full transition-all duration-500 group-hover:w-16 
                       ${isDark ? 'bg-teal-400/30 group-hover:bg-teal-400' : 'bg-teal-600/20 group-hover:bg-teal-600'}`} />
                   </div>
 
-                  {/* Shrunk the link icon for mobile */}
                   <ExternalLink className={`absolute top-3 right-3 w-3 h-3 sm:w-4 sm:h-4 transition-all duration-500 
                     ${isDark ? 'text-white/10 group-hover:text-teal-400' : 'text-black/10 group-hover:text-teal-600'}`} />
                 </div>
@@ -377,6 +452,7 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
           </motion.div>
         </div>
       </section>
+      
 {/* --- TOP 10 LEADERBOARD --- */}
 <section className="relative z-20 py-20 md:py-32 max-w-6xl mx-auto px-4 md:px-6">
   <motion.div
@@ -453,9 +529,13 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
       ))
     ) : (
       <div className="col-span-full py-10 text-center">
-        <p className="opacity-50 italic mb-4 text-white text-sm">
-          The ranks are currently empty...
-        </p>
+       <p 
+      className={`opacity-50 italic mb-4 text-sm ${
+        isDark ? 'text-white' : 'text-slate-900'
+      }`}
+    >
+      The ranks are currently empty...
+    </p>
         <p className="text-lime-400 font-black uppercase text-xs md:text-sm animate-bounce tracking-widest">
           Be the first to join the legend!
         </p>
@@ -691,46 +771,67 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
   initial={{ opacity: 0, y: 30 }}
   animate={{ opacity: 1, y: 0 }}
   transition={{ delay: 1, duration: 0.6 }}
-  className="fixed z-[60] bottom-3 md:bottom-4 inset-x-0 md:inset-x-auto md:right-6 flex justify-center md:justify-end pointer-events-none"
+  className="fixed z-[60] bottom-2 md:bottom-4 inset-x-0 md:inset-x-auto md:right-6 flex justify-center md:justify-end pointer-events-auto px-2 md:px-0"
 >
   <div
-    className={`pointer-events-auto flex items-center gap-2 md:gap-3 px-3 md:px-4 py-3 rounded-2xl border backdrop-blur-xl shadow-lg
-    ${isDark ? 'bg-black/70 border-teal-500/40' : 'bg-white/90 border-teal-600/40'}`}
+    className={`flex flex-col md:flex-row items-center gap-2 md:gap-3 px-2.5 py-2.5 md:px-4 md:py-3 rounded-2xl border backdrop-blur-xl shadow-2xl w-full max-w-[310px] md:max-w-none
+    ${isDark ? 'bg-black/80 border-teal-500/40' : 'bg-white/95 border-teal-600/40'}`}
   >
-    {/* MOBILE HELPER TEXT */}
-    <span className="md:hidden text-[8px] font-mono uppercase tracking-[0.18em] text-teal-400 opacity-70">
-      Tap any number to contact us
-    </span>
+    {/* LABEL - Scaled down for 320px */}
+    <div className="flex flex-col items-center md:items-start">
+      <span className="text-[7px] md:text-[9px] font-mono uppercase tracking-[0.15em] md:tracking-[0.2em] text-teal-500 font-bold leading-none mb-1 md:mb-0">
+        Chat or Call the Qrew
+      </span>
+    </div>
 
-    {/* DESKTOP TEXT (UNCHANGED) */}
-    <span className="hidden md:inline text-[9px] font-mono uppercase tracking-[0.25em] text-teal-400">
-      Need to reach the Qrew?
-    </span>
+    <div className="flex flex-col xs:flex-row flex-wrap justify-center gap-1.5 md:gap-2 items-center w-full md:w-auto">
+      {/* CONTACT ONE: SPLIT BUTTON */}
+      <div className="flex items-center overflow-hidden rounded-lg md:rounded-xl shadow-sm border border-black/5 w-full xs:w-auto">
+        <a
+          href="https://wa.me/2349112536022?text=Hello%20ServeQrew%2C%20I%20need%20assistance."
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-lime-400 hover:bg-lime-300 text-black text-[9px] md:text-xs font-black uppercase italic px-2.5 py-2 border-r border-black/10 transition-colors flex-1 text-center"
+        >
+          Chat
+        </a>
+        <a
+          href="tel:09112536022"
+          className="bg-lime-400 hover:bg-lime-300 text-black text-[9px] md:text-xs font-black uppercase italic px-2.5 py-2 transition-colors flex-[2] text-center"
+        >
+          0911 253 6022
+        </a>
+      </div>
 
-    <div className="flex items-center gap-2 whitespace-nowrap">
-      <a
-        href="tel:09112536022"
-        className="text-[10px] md:text-sm font-black uppercase italic tracking-[0.16em] md:tracking-[0.18em] px-3 py-1.5 rounded-xl bg-lime-400 text-black hover:bg-lime-300 transition-colors"
-      >
-        0911 253 6022
-      </a>
-
-      <a
-        href="tel:07084515746"
-        className={`text-[10px] md:text-sm font-black uppercase italic tracking-[0.16em] md:tracking-[0.18em] px-3 py-1.5 rounded-xl border
-        ${
-          isDark
-            ? 'border-teal-500/60 text-teal-300 hover:bg-teal-500/20'
-            : 'border-teal-600/70 text-teal-700 hover:bg-teal-600/10'
-        } transition-colors`}
-      >
-        0708 451 5746
-      </a>
+      {/* CONTACT TWO: SPLIT BUTTON */}
+      <div className="flex items-center overflow-hidden rounded-lg md:rounded-xl shadow-sm border border-teal-500/20 w-full xs:w-auto">
+        <a
+          href="https://wa.me/2347084515746?text=Hello%20ServeQrew%2C%20I%20have%20a%20question."
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`text-[9px] md:text-xs font-black uppercase italic px-2.5 py-2 border-r transition-colors flex-1 text-center ${
+            isDark 
+              ? 'bg-teal-500/10 text-teal-400 border-teal-500/20 hover:bg-teal-500/20' 
+              : 'bg-teal-600/5 text-teal-700 border-teal-600/20 hover:bg-teal-600/10'
+          }`}
+        >
+          Chat
+        </a>
+        <a
+          href="tel:07084515746"
+          className={`text-[9px] md:text-xs font-black uppercase italic px-2.5 py-2 transition-colors flex-[2] text-center ${
+            isDark 
+              ? 'bg-teal-500/10 text-teal-400 hover:bg-teal-500/20' 
+              : 'bg-teal-600/5 text-teal-700 hover:bg-teal-600/10'
+          }`}
+        >
+          0708 451 5746
+        </a>
+      </div>
     </div>
   </div>
 </motion.div>
-    </div>
+</div>
   );
 }
-
 export default ServeQrew;
