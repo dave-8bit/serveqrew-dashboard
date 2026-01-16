@@ -303,7 +303,7 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
     { name: 'Crochet Art', img: crochetArt, desc: 'Luxury Handcrafted Art.' },
     { name: 'Shadow Enterprise', img: kekachi, desc: 'Your Online Gadget Store.' },
     { name: 'Essence Haven', img: chioma, desc: 'Premium fragrances.' },
-    { name: "Tessy's Kitchen", img: tessy, desc: 'Fresh pastries, cakes, and homemade treats.' }
+    { name: "Tessy's Kitchen", img: tessy, desc: 'Fresh pastries, cakes, and homemade delicious treats.' }
   ];
 
   const ambassadors = [
