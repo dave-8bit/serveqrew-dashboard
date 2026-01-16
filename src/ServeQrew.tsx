@@ -192,7 +192,7 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
   };
 
   const faqs = [
-    { q: "What exactly is ServeQrew?", a: "Think of it as a digital market. It’s where you go when you need a laundry guy, an online fragrance store, a web developer, or even a used textbook, basically any goods or service that you can think off." },
+    { q: "What exactly is ServeQrew?", a: "Think of it as a digital market. It's where people find,buy and offer goods and services.You're not just borrowing to purchase,you can also list the products you sell or services you offer,,chat directly with customers and grow your hustle." },
     { q: "Do I have to be a student to use it?", a: "Our heart is in UNN for now as we have to start somewhere so students are our priority. However, anyone in Nigeria (lecturers, business owners, etc.) can buy or sell services! UNN is the starting point!" },
     { q: "How do I get paid for my services?", a: "You search for a provider, chat with them directly on the app, and agree on terms. We are building secure ways to ensure everyone gets what they paid for and also maximum security of vital information." },
     { q: "Is my data safe?", a: "100%. We use modern security to keep your chats private. Plus, we verify users to keep the scammers out." },
@@ -201,10 +201,10 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
 
   const collaborators = [
     { name: 'Prime Gadgets', img: primegadgets, desc: 'Premier hardware devices.' },
-    { name: 'Crypto Qrew', img: cryptoqrew, desc: 'Digital asset management.' },
-    { name: 'Jessica', img: jessica, desc: 'Elite Visual Brand Identity.' },
-    { name: 'Alex', img: alex, desc: 'Strategic Brand Consultancy.' },
-    { name: 'Muna Style', img: muna, desc: 'Bespoke apparel design.' },
+    { name: 'Crypto Qrew', img: cryptoqrew, desc: 'Seamless crypto-related insights,transactions and digital finance awareness.' },
+    { name: 'Jessica', img: jessica, desc: 'Driving awareness and helping ServeQrew reach the right audience through engagement.' },
+    { name: 'Alex', img: alex, desc: 'Driving awareness and helping ServeQrew reach the right audience through organic promotion.' },
+    { name: 'Muna Style', img: muna, desc: 'Showcasing friendly fashion and lifestyle products.' },
     { name: 'Crochet Art', img: crochetArt, desc: 'Luxury Handcrafted Art.' },
     { name: 'Shadow Enterprise', img: kekachi, desc: 'Your Online Gadget Store.' },
     { name: 'Essence Haven', img: chioma, desc: 'Premium fragrances.' },
@@ -212,8 +212,8 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
   ];
 
   const ambassadors = [
-    { name: "Ekobosowo Ella", role: "Strategic Lead", img: ella, bio: "Ella is one of the most recognized faces on campus. She helps represent ServeQrew, spread the word, and connect us with the student community.", color: "from-teal-500/20" },
-    { name: "Nu3l", role: "Growth Architect", img: nuel, bio: "Nu3l is an upcoming artist who brings creativity and culture into the ServeQrew brand. He helps push the vibe, visuals, and creative direction of the platform.", color: "from-lime-500/20" }
+    { name: "Ekobosowo Ella", role: "Campus Ambassador", img: ella, bio: "Ella is one of the most recognized faces on campus. She helps represent ServeQrew, spread the word, and connect us with the student community.", color: "from-teal-500/20" },
+    { name: "Nu3l", role: "Creative Ambassador", img: nuel, bio: "Nu3l is an upcoming artist who brings creativity and culture into the ServeQrew brand. He helps push the vibe, visuals, and creative direction of the platform.", color: "from-lime-500/20" }
   ];
 
   return (
