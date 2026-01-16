@@ -68,69 +68,110 @@ interface ServeQrewProps {
   onNavigate: (code: string) => void;
 }
 
+const Spinner = () => (
+  <span className="inline-block h-5 w-5 rounded-full border-2 border-black/30 border-t-black animate-spin" />
+);
+
+
 const ServeQrew: React.FC<ServeQrewProps> = ({ onNavigate }) => {
   const [isDark, setIsDark] = useState(true);
+  const [isJoining, setIsJoining] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [waitlistStatus, setWaitlistStatus] = useState<{type: 'success' | 'error', message: string} | null>(null);
   const [expandedBrand, setExpandedBrand] = useState<number | null>(null);
   const [expandedAmbassador, setExpandedAmbassador] = useState<number | null>(null); 
-      
-  const [leaderboard, setLeaderboard] = useState<{name: string, referrals: number}[]>([]);
+  const [leaderboard, setLeaderboard] = useState<
+  Array<{ name: string; referrals: number; rank: number }>
+>([]);
+ const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
+ const [leaderboardError, setLeaderboardError] = useState<string | null>(null);
+
+
 
   const waitlistRef = useRef<HTMLDivElement>(null);
 useEffect(() => {
-  const fetchLeaderboard = async () => {
-    try {
-      const res = await fetch(
-        // UPDATED: Added /leaderboard to the end of the URL
-        'https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/leaderboard',
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          },
-        }
-      );
+ const fetchLeaderboard = async () => {
+  setLoadingLeaderboard(true);
+  setLeaderboardError(null);
 
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-
-      const data = await res.json();
-      console.log('Leaderboard raw data:', data);
-
-      // Backend sends { topReferrers: [...] }
-      if (data.topReferrers && Array.isArray(data.topReferrers)) {
-        setLeaderboard(data.topReferrers);
-      } 
-      else if (data.data && Array.isArray(data.data)) {
-        setLeaderboard(data.data);
-      } 
-      else {
-        setLeaderboard([]);
-        console.warn('Leaderboard response did not match expected structure.');
+  try {
+    const res = await fetch(
+      'https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/leaderboard',
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
       }
+    );
 
-    } catch (err: unknown) {
-      console.error('Leaderboard fetch error:', err);
-      setLeaderboard([]); 
-    }
-  };
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
-  fetchLeaderboard(); 
-  const interval = setInterval(fetchLeaderboard, 30000); 
+    const data: Array<{ name: string; referrals: number; rank: number }> = await res.json();
+    setLeaderboard(data);
+  } catch (err: unknown) {
+    console.error('Leaderboard fetch error:', err);
+    setLeaderboardError('Failed to fetch leaderboard. Please try again later.');
+  } finally {
+    setLoadingLeaderboard(false);
+  }
+};
+
+  fetchLeaderboard();
+  const interval = setInterval(fetchLeaderboard, 30000); // refresh every 30s
   return () => clearInterval(interval);
 }, []);
 
 const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
-  setWaitlistStatus(null); // reset any previous messages
+
+  if (isJoining) return; // prevent double submission
+  setIsJoining(true);
+  setWaitlistStatus(null);
 
   const form = e.currentTarget;
   const full_name = (form.elements.namedItem('full_name') as HTMLInputElement).value.trim();
   const email = (form.elements.namedItem('email') as HTMLInputElement).value.trim();
   const brand_name = (form.elements.namedItem('brand_name') as HTMLInputElement)?.value.trim();
+
+  // --- STRICT FRONTEND EMAIL VALIDATION ---
+  // This regex follows RFC 5322 standards and rejects:
+  // - Emails without proper domain (a@b is invalid)
+  // - Consecutive dots (a..b@example.com)
+  // - Special characters in local part (unless quoted)
+  // - Missing TLD (a@b.c is invalid - needs at least 2 chars after dot)
+  const strictEmailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+  
+  if (!strictEmailRegex.test(email)) {
+    setWaitlistStatus({
+      type: 'error',
+      message: 'Please enter a valid email address (e.g., user@example.com)',
+    });
+    setIsJoining(false);
+    return;
+  }
+
+  // Additional checks
+  if (email.includes('..')) {
+    setWaitlistStatus({
+      type: 'error',
+      message: 'Email cannot contain consecutive dots.',
+    });
+    setIsJoining(false);
+    return;
+  }
+
+  if (email.startsWith('.') || email.endsWith('.')) {
+    setWaitlistStatus({
+      type: 'error',
+      message: 'Email cannot start or end with a dot.',
+    });
+    setIsJoining(false);
+    return;
+  }
 
   try {
     const res = await fetch(
@@ -139,38 +180,92 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+          // Authorization header removed - only use apikey for Supabase Edge Functions
         },
         body: JSON.stringify({ full_name, email, brand_name }),
       }
     );
 
-    const data: { referralCode?: string; message?: string; error?: string } = await res.json();
+    const data: { referralCode?: string; message?: string; error?: string; field?: string } = await res.json();
 
-    if (res.status === 201) {
-      // Success
-      setWaitlistStatus({ type: 'success', message: data.message || 'Welcome to the Qrew!' });
-      if (data.referralCode) {
-        onNavigate(data.referralCode); // go to dashboard if referral code returned
-      }
-    } else if (res.status === 409) {
-      // Duplicate email
-      setWaitlistStatus({
-        type: 'error',
-        message: 'This email is already on the waitlist. Check your inbox for your referral link!',
-      });
-    } else {
-      // Any other server error
-      setWaitlistStatus({ type: 'error', message: data.error || 'Something went wrong' });
+    // --- HANDLE SERVER RESPONSES ---
+    switch (res.status) {
+      case 201:
+        setWaitlistStatus({
+          type: 'success',
+          message: data.message || 'Welcome to the Qrew!',
+        });
+        form.reset();
+        if (data.referralCode) onNavigate(data.referralCode);
+        break;
+
+      case 400:
+        if (data.error === 'missing_field') {
+          setWaitlistStatus({
+            type: 'error',
+            message: `${data.field} is required.`,
+          });
+        } else if (data.error === 'field_too_long') {
+          setWaitlistStatus({
+            type: 'error',
+            message: `${data.field} is too long. Please shorten it.`,
+          });
+        } else {
+          setWaitlistStatus({
+            type: 'error',
+            message: 'Invalid input. Please check your form.',
+          });
+        }
+        break;
+
+      case 409:
+        setWaitlistStatus({
+          type: 'error',
+          message: 'This email is already on the waitlist. Check your inbox for your referral link!',
+        });
+        break;
+
+      case 422:
+        setWaitlistStatus({
+          type: 'error',
+          message: 'Sorry, your email address is invalid. Please enter a valid email.',
+        });
+        break;
+
+      case 429:
+        setWaitlistStatus({
+          type: 'error',
+          message: 'Too many requests. Please wait 2 minutes and try again.',
+        });
+        break;
+
+      case 500:
+      case 501:
+      case 502:
+      case 503:
+        setWaitlistStatus({
+          type: 'error',
+          message: data.message || 'Something went wrong on our end. Please try later.',
+        });
+        break;
+
+      default:
+        setWaitlistStatus({
+          type: 'error',
+          message: data.message || 'Unexpected error. Please try again.',
+        });
     }
   } catch (err) {
     console.error('Join error:', err);
-    setWaitlistStatus({ type: 'error', message: 'Failed to connect to server' });
+    setWaitlistStatus({
+      type: 'error',
+      message: 'Failed to connect to server. Check your internet connection.',
+    });
+  } finally {
+    setIsJoining(false);
   }
 };
-
-
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => setMousePos({ x: e.clientX, y: e.clientY });
@@ -192,7 +287,7 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
   };
 
   const faqs = [
-    { q: "What exactly is ServeQrew?", a: "Think of it as a digital market. It's where people find,buy and offer goods and services.You're not just borrowing to purchase,you can also list the products you sell or services you offer,,chat directly with customers and grow your hustle." },
+    { q: "What exactly is ServeQrew?", a: "Think of it as a digital market. It's where people find,buy and offer goods and services. You're not just borrowing to purchase, you can also list the products you sell or services you offer, chat directly with customers and grow your hustle." },
     { q: "Do I have to be a student to use it?", a: "Our heart is in UNN for now as we have to start somewhere so students are our priority. However, anyone in Nigeria (lecturers, business owners, etc.) can buy or sell services! UNN is the starting point!" },
     { q: "How do I get paid for my services?", a: "You search for a provider, chat with them directly on the app, and agree on terms. We are building secure ways to ensure everyone gets what they paid for and also maximum security of vital information." },
     { q: "Is my data safe?", a: "100%. We use modern security to keep your chats private. Plus, we verify users to keep the scammers out." },
@@ -201,7 +296,7 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
 
   const collaborators = [
     { name: 'Prime Gadgets', img: primegadgets, desc: 'Premier hardware devices.' },
-    { name: 'Crypto Qrew', img: cryptoqrew, desc: 'Seamless crypto-related insights,transactions and digital finance awareness.' },
+    { name: 'Crypto Qrew', img: cryptoqrew, desc: 'Seamless crypto-related insights, transactions and digital finance awareness.' },
     { name: 'Jessica', img: jessica, desc: 'Driving awareness and helping ServeQrew reach the right audience through engagement.' },
     { name: 'Alex', img: alex, desc: 'Driving awareness and helping ServeQrew reach the right audience through organic promotion.' },
     { name: 'Muna Style', img: muna, desc: 'Showcasing friendly fashion and lifestyle products.' },
@@ -485,8 +580,7 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
           </motion.div>
         </div>
       </section>
-      
-{/* --- TOP 10 LEADERBOARD --- */}
+      {/* --- TOP 10 LEADERBOARD --- */}
 <section className="relative z-20 py-20 md:py-32 max-w-6xl mx-auto px-4 md:px-6">
   <motion.div
     initial={{ opacity: 0, y: 30 }}
@@ -512,21 +606,49 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
     </p>
   </motion.div>
 
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-    {leaderboard.length > 0 ? (
+  {/* Leaderboard Grid */}
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-h-[70vh] overflow-y-auto">
+    {loadingLeaderboard ? (
+      // Loading State
+      <div className="col-span-full py-10 text-center flex flex-col items-center justify-center gap-4">
+        <span className="inline-block h-8 w-8 border-4 border-l-lime-500 border-t-lime-500 border-r-transparent border-b-transparent rounded-full animate-spin" />
+        <p className={`opacity-50 italic mb-2 text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>
+          Fetching leaderboard…
+        </p>
+      </div>
+    ) : leaderboardError ? (
+      // Error State
+      <div className="col-span-full py-10 text-center text-red-500 font-bold">
+        {leaderboardError}
+      </div>
+    ) : leaderboard.length === 0 ? (
+      // Empty State
+      <div className="col-span-full py-10 text-center flex flex-col items-center justify-center gap-4">
+        <p className={`opacity-50 italic mb-2 text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>
+          The ranks are currently empty...
+        </p>
+        <p className="text-lime-400 font-black uppercase text-xs md:text-sm animate-bounce tracking-widest">
+          Be the first to join the legend!
+        </p>
+      </div>
+    ) : (
+      // Leaderboard Cards
       leaderboard.map((user, index) => (
         <motion.div
-          key={index}
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           className={`relative p-4 md:p-6 rounded-3xl border flex items-center justify-between overflow-hidden ${
             isDark ? 'bg-white/5 border-white/10' : 'bg-black/5 border-black/10'
           }`}
         >
-          {/* EARLY BIRD BADGE */}
-          {leaderboard.length < 3 && (
-            <div className="absolute top-0 right-0 bg-lime-400 text-black text-[7px] font-black uppercase px-2 py-1 rounded-bl-lg tracking-tighter animate-pulse">
-              Early Bird
+          {/* Top 3 Badge */}
+          {index < 3 && (
+            <div
+              className={`absolute top-0 right-0 text-black text-[7px] font-black uppercase px-2 py-1 rounded-bl-lg tracking-tighter animate-pulse ${
+                index === 0 ? 'bg-yellow-400' : index === 1 ? 'bg-gray-400' : 'bg-orange-400'
+              }`}
+            >
+              {index === 0 ? '🥇 Top' : index === 1 ? '🥈 Top' : '🥉 Top'}
             </div>
           )}
 
@@ -543,7 +665,7 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
               >
                 {user.name}
               </span>
-
+              {/* Optional Verified Badge */}
               <span className="text-[9px] md:text-[10px] text-lime-500 font-mono uppercase tracking-widest">
                 Verified Qrew
               </span>
@@ -551,33 +673,17 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
           </div>
 
           <div className="text-right">
-            <span className="block text-lg md:text-xl font-black italic">
-              {user.referrals}
-            </span>
+            <span className="block text-lg md:text-xl font-black italic">{user.referrals}</span>
             <span className="text-[7px] md:text-[8px] uppercase tracking-widest opacity-50">
               Refers
             </span>
           </div>
         </motion.div>
       ))
-    ) : (
-      <div className="col-span-full py-10 text-center">
-       <p 
-      className={`opacity-50 italic mb-4 text-sm ${
-        isDark ? 'text-white' : 'text-slate-900'
-      }`}
-    >
-      The ranks are currently empty...
-    </p>
-        <p className="text-lime-400 font-black uppercase text-xs md:text-sm animate-bounce tracking-widest">
-          Be the first to join the legend!
-        </p>
-      </div>
     )}
   </div>
 </section>
 
-{/* WAITLIST SECTION */}
 {/* WAITLIST SECTION */}
 <section
   ref={waitlistRef}
@@ -645,16 +751,35 @@ const joinWaitlist = async (e: React.FormEvent<HTMLFormElement>) => {
       {waitlistStatus.message}
     </p>
   )}
-
-  <button
-    type="submit"
-    className="w-full py-4 md:py-5 rounded-xl md:rounded-2xl font-black uppercase italic tracking-tighter bg-[#84CC16] text-black hover:bg-lime-400 transition-all flex items-center justify-center gap-2 md:gap-3 text-sm md:text-base"
-  >
-    <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
-    Join The Waitlist
-  </button>
+<button
+  type="submit"
+  disabled={isJoining}
+  className={`
+    w-full py-4 md:py-5 rounded-xl md:rounded-2xl
+    font-black uppercase italic tracking-tighter
+    flex items-center justify-center gap-3
+    text-sm md:text-base
+    transition-all duration-300
+    ${
+      isJoining
+        ? 'bg-lime-300 text-black cursor-not-allowed'
+        : 'bg-[#84CC16] text-black hover:bg-lime-400'
+    }
+  `}
+>
+  {isJoining ? (
+    <>
+      <Spinner />
+      <span className="animate-pulse tracking-wide">Joining waitlist…</span>
+    </>
+  ) : (
+    <>
+      <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
+      Join The Waitlist
+    </>
+  )}
+</button>
 </form>
-
 
     </motion.div>
   </div>

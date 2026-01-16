@@ -1,8 +1,10 @@
 // src/Dashboard.tsx
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Copy, Home, Users, Trophy, Share2, Sparkles } from 'lucide-react';
+import { Copy, Home, Share2, Sparkles, Users, Trophy } from 'lucide-react';
 import logo from './assets/logo.jpeg';
+
+/* ---------------- TYPES ---------------- */
 
 type Referral = {
   name: string;
@@ -17,6 +19,8 @@ type UserData = {
   rank: number;
   referralList: Referral[];
 };
+
+/* ---------------- PARTICLE ---------------- */
 
 const Particle = ({
   size,
@@ -39,7 +43,14 @@ const Particle = ({
   />
 );
 
-const Dashboard = ({ referralCode }: { referralCode: string }) => {
+/* ================= DASHBOARD ================= */
+
+const Dashboard = () => {
+  /* ---- MAGIC LINK FRIENDLY ---- */
+  const referralCode =
+    new URLSearchParams(window.location.search).get('code') || '';
+
+  /* ---- STATE ---- */
   const [userData, setUserData] = useState<UserData>({
     name: '',
     email: '',
@@ -48,10 +59,11 @@ const Dashboard = ({ referralCode }: { referralCode: string }) => {
     rank: 0,
     referralList: [],
   });
+
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
-  // Generate particles
+  /* ---- PARTICLES ---- */
   const [particles] = useState(() =>
     [...Array(15)].map(() => ({
       size: Math.random() * 12 + 6,
@@ -60,221 +72,182 @@ const Dashboard = ({ referralCode }: { referralCode: string }) => {
       delay: Math.random() * 5,
       duration: 6 + Math.random() * 4
     }))
-  );// ----------- POLLING DASHBOARD DATA WITH REFERRALS -----------
- useEffect(() => {
-  let isMounted = true;
-const fetchDashboardData = async () => {
-  try {
-    const res = await fetch(
-      `https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/dashboard?code=${referralCode}`,
-      {
-        // CHANGED: method is now 'GET' to match the URL parameters
-        method: 'GET', 
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-        },
-      }
-    );
+  );
 
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-
-    const data: {
-      name: string;
-      email: string;
-      referralLink: string;
-      referrals: number;
-      rank: number;
-      referralList?: Array<{ name: string; email: string }>;
-    } = await res.json();
-
-    if (isMounted) {
-      setUserData({
-        name: data.name,
-        email: data.email,
-        referralLink: data.referralLink,
-        referrals: data.referrals,
-        rank: data.rank,
-        referralList: data.referralList || [],
-      });
+  /* ---- GUARD: NO MAGIC LINK ---- */
+  useEffect(() => {
+    if (!referralCode) {
+      window.location.href = '/';
     }
-  } catch (err: unknown) {
-    console.error('Error fetching dashboard data:', err);
-  } finally {
-    if (isMounted) setLoading(false);
-  }
-};
-  fetchDashboardData(); // initial fetch
+  }, [referralCode]);
 
-  const interval = setInterval(fetchDashboardData, 5000); // poll every 5s
-  return () => {
-    isMounted = false;
-    clearInterval(interval);
-  };
-}, [referralCode]);
+  /* ---- FETCH DASHBOARD DATA ---- */
+  useEffect(() => {
+    let isMounted = true;
 
-  const copyLink = () => {
-    if (userData.referralLink) {
-      navigator.clipboard.writeText(userData.referralLink);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
-  const shareLink = async () => {
-    if (navigator.share && userData.referralLink) {
+    const fetchDashboardData = async () => {
       try {
-        await navigator.share({
-          title: 'Join ServeQrew',
-          text: `Join me on ServeQrew and let's grow together!`,
-          url: userData.referralLink,
-        });
+        const res = await fetch(
+          `https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/dashboard?code=${referralCode}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            },
+          }
+        );
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data: UserData = await res.json();
+
+        if (isMounted) {
+          setUserData({
+            name: data.name,
+            email: data.email,
+            referralLink: data.referralLink,
+            referrals: data.referrals,
+            rank: data.rank,
+            referralList: data.referralList || [],
+          });
+        }
       } catch (err) {
-        // Preserving 'err' as requested for your backend context
-        console.error('Share action encounterd an issue:', err);
+        console.error('Dashboard fetch error:', err);
+      } finally {
+        if (isMounted) setLoading(false);
       }
+    };
+
+    fetchDashboardData();
+    const interval = setInterval(fetchDashboardData, 5000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [referralCode]);
+
+  /* ---- COPY ---- */
+  const copyLink = () => {
+    navigator.clipboard.writeText(userData.referralLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  /* ---- SHARE ---- */
+  const shareLink = async () => {
+    if (navigator.share) {
+      await navigator.share({
+        title: 'Join ServeQrew',
+        text: 'Join me on ServeQrew!',
+        url: userData.referralLink,
+      });
     } else {
       copyLink();
     }
   };
 
-  if (loading) return <p className="text-center mt-20 font-black uppercase italic animate-pulse tracking-widest text-teal-600">Loading your dashboard...</p>;
+  /* ---- LOADING ---- */
+  if (loading) {
+    return (
+      <p className="text-center mt-24 font-black uppercase italic tracking-widest animate-pulse text-teal-600">
+        Loading your dashboard…
+      </p>
+    );
+  }
+
+  /* ================= UI ================= */
 
   return (
-    <div className="min-h-screen relative bg-gradient-to-b from-white via-white to-gray-50 overflow-hidden text-gray-900 font-sans">
-      {/* ---------- PARTICLES ---------- */}
-      {particles.map((p, i) => (
-        <Particle key={i} {...p} />
-      ))}
+    <div className="min-h-screen relative bg-gradient-to-b from-white via-white to-gray-50 overflow-hidden text-gray-900">
+      {/* PARTICLES */}
+      {particles.map((p, i) => <Particle key={i} {...p} />)}
 
-      {/* ---------- NAVBAR ---------- */}
-      <nav className="fixed top-0 w-full bg-white/90 backdrop-blur-md shadow-md z-50 px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <img src={logo} alt="ServeQrew" className="w-10 h-10 sm:w-12 sm:h-12 object-contain rounded-xl" />
-          <span className="text-lg sm:text-xl font-black uppercase italic tracking-tight">ServeQrew Dashboard</span>
+      {/* NAV */}
+      <nav className="fixed top-0 w-full bg-white/90 backdrop-blur shadow z-50 px-6 py-4 flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <img src={logo} className="w-12 h-12 rounded-xl" />
+          <span className="font-black italic text-xl">ServeQrew Dashboard</span>
         </div>
-        <a href="/" className="p-3 rounded-xl border border-gray-300 hover:bg-gray-100 transition">
-          <Home className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
+        <a href="/" className="flex items-center gap-2 border px-4 py-2 rounded-xl">
+          <Home className="w-5 h-5" />
+          Home
         </a>
       </nav>
 
-      {/* ---------- HERO ---------- */}
-      <section className="pt-28 pb-12 px-4 sm:px-6 flex justify-center">
+      {/* HERO */}
+      <section className="pt-32 flex justify-center px-6">
         <motion.div
-          initial={{ opacity: 0, y: -60 }}
+          initial={{ opacity: 0, y: -40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="bg-gradient-to-r from-teal-100 to-lime-100 rounded-3xl shadow-2xl p-8 sm:p-12 max-w-xl w-full text-center hover:scale-105 transition-transform"
+          className="bg-gradient-to-r from-teal-100 to-lime-100 p-10 rounded-3xl shadow-xl text-center max-w-xl w-full"
         >
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase italic tracking-tight mb-4">
-            Welcome{userData.name ? `, ${userData.name.split(' ')[0]}` : ""}!
+          <h1 className="text-4xl font-black italic uppercase mb-2">
+            Welcome, {userData.name.split(' ')[0]}
           </h1>
-          <p className="text-xs sm:text-sm md:text-base opacity-80">
-            Your email: <span className="font-bold">{userData.email || "-"}</span>
-          </p>
+          <p className="opacity-70">{userData.email}</p>
         </motion.div>
       </section>
 
-      {/* ---------- REFERRAL & REWARDS ---------- */}
-      <section className="px-4 sm:px-6 flex justify-center mb-16 w-full">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.2 }}
-          className="bg-white shadow-2xl border border-gray-200 rounded-3xl p-6 sm:p-10 max-w-xl w-full flex flex-col items-center gap-6 relative overflow-hidden hover:shadow-teal-400/30 hover:scale-105 transition-all"
-        >
-          <h2 className="text-2xl font-black uppercase italic mb-2">Your Referral Link</h2>
-          <div className="flex flex-col sm:flex-row items-center gap-2 w-full">
+      {/* STATS */}
+      <section className="flex justify-center px-6 mt-8">
+        <div className="grid grid-cols-2 gap-6 max-w-xl w-full">
+          <div className="bg-white rounded-3xl p-6 shadow text-center">
+            <Users className="mx-auto mb-2 text-teal-500" />
+            <p className="text-3xl font-black">{userData.referrals}</p>
+            <p className="text-xs uppercase opacity-60">Referrals</p>
+          </div>
+          <div className="bg-white rounded-3xl p-6 shadow text-center">
+            <Trophy className="mx-auto mb-2 text-lime-500" />
+            <p className="text-3xl font-black">#{userData.rank || '-'}</p>
+            <p className="text-xs uppercase opacity-60">Rank</p>
+          </div>
+        </div>
+      </section>
+
+      {/* REFERRAL */}
+      <section className="flex justify-center px-6 mt-10">
+        <div className="bg-white rounded-3xl p-8 shadow max-w-xl w-full">
+          <h2 className="font-black italic uppercase mb-4">Your Referral Link</h2>
+
+          <div className="flex gap-2 mb-4">
             <input
-              type="text"
               readOnly
               value={userData.referralLink}
-              placeholder="Referral link will appear here"
-              className="flex-1 px-3 py-3 border rounded-xl outline-none bg-gray-50 font-mono text-xs sm:text-sm w-full"
+              className="flex-1 px-3 py-2 border rounded-xl text-xs font-mono"
             />
-            <div className="flex gap-2 w-full sm:w-auto">
-              <button
-                onClick={copyLink}
-                className="flex-1 sm:flex-none px-4 py-3 bg-gray-100 text-gray-700 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-200 transition font-bold"
-              >
-                <Copy className="w-4 h-4 sm:w-5 sm:h-5" />
-                {copied ? 'Copied!' : 'Copy'}
-              </button>
-              <button
-                onClick={shareLink}
-                className="flex-1 sm:flex-none px-6 py-3 bg-teal-500 text-white rounded-xl flex items-center justify-center gap-2 hover:bg-teal-600 transition font-bold shadow-lg shadow-teal-500/20"
-              >
-                <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                Share
-              </button>
-            </div>
+            <button onClick={copyLink} className="px-4 py-2 border rounded-xl">
+              <Copy className="w-4 h-4" />
+              {copied && <span className="ml-1 text-xs">Copied</span>}
+            </button>
+            <button onClick={shareLink} className="px-4 py-2 bg-teal-500 text-white rounded-xl">
+              <Share2 className="w-4 h-4" />
+            </button>
           </div>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="text-xs text-gray-600 mt-2 text-center"
-          >
-            Share this link with friends to climb the leaderboard and earn rewards.
-          </motion.div>
 
-          {/* ---------- LIVE REFERRALS LIST ---------- */}
-          <div className="w-full mt-6 text-center">
-            <h3 className="text-lg font-bold uppercase mb-2 flex items-center justify-center gap-2">
-               <Sparkles className="w-4 h-4 text-teal-500" /> Your Referrals
-            </h3>
-            {userData.referralList.length > 0 ? (
-              <ul className="text-sm flex flex-col gap-1 max-h-48 overflow-y-auto pr-2">
-                {userData.referralList.map((r, i) => (
-                  <li key={i} className="py-2 border-b border-gray-50 last:border-0 flex justify-between items-center">
-                    <span className="font-bold uppercase italic text-[10px] sm:text-xs">{r.name}</span>
-                    <span className="opacity-50 text-[10px] sm:text-xs">{r.email}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-sm opacity-60">You haven’t referred anyone yet.</p>
-            )}
-          </div>
-        </motion.div>
+          <h3 className="flex items-center gap-2 font-bold uppercase text-sm">
+            <Sparkles className="w-4 h-4 text-teal-500" />
+            Your Referrals
+          </h3>
+
+          {userData.referralList.length ? (
+            <ul className="mt-2 text-xs">
+              {userData.referralList.map((r, i) => (
+                <li key={i} className="flex justify-between py-1 border-b">
+                  <span>{r.name}</span>
+                  <span className="opacity-50">{r.email}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="opacity-50 text-sm mt-2">No referrals yet</p>
+          )}
+        </div>
       </section>
 
-      {/* ---------- PROGRESS ---------- */}
-      <section className="px-4 sm:px-6 flex justify-center w-full">
-        <motion.div
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="bg-white shadow-2xl border border-gray-200 rounded-3xl p-6 sm:p-10 max-w-2xl w-full grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 hover:shadow-lime-400/30 hover:scale-105 transition-all"
-        >
-          <div className="flex flex-col items-center justify-center gap-2">
-            <Users className="w-10 h-10 text-teal-500" />
-            <span className="text-3xl font-black">{userData.referrals}</span>
-            <span className="text-sm uppercase tracking-wide opacity-70">Referrals</span>
-          </div>
-          <div className="flex flex-col items-center justify-center gap-2">
-            <Trophy className="w-10 h-10 text-lime-500" />
-            <span className="text-3xl font-black">#{userData.rank || "-"}</span>
-            <span className="text-sm uppercase tracking-wide opacity-70">Your Rank</span>
-          </div>
-          <div className="flex flex-col items-center justify-center gap-2 w-full">
-            <span className="text-sm uppercase tracking-wide opacity-70">Progress to Top 10</span>
-            <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden mt-2">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.min((userData.referrals / 100) * 100, 100)}%` }}
-                transition={{ duration: 1.4, ease: 'easeOut' }}
-                className="h-full bg-gradient-to-r from-teal-400 to-lime-400"
-              />
-            </div>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* ---------- FOOTER ---------- */}
-      <footer className="mt-32 py-16 text-center text-gray-500 text-xs">
-        © 2026 ServeQrew. All rights reserved.
+      <footer className="mt-24 text-center text-xs opacity-50 py-12">
+        © 2026 ServeQrew
       </footer>
     </div>
   );
