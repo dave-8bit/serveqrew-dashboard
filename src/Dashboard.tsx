@@ -13,7 +13,7 @@ type Referral = {
 
 type UserData = {
   name: string;
-  email: string;
+  email?: string; // optional in case backend doesn't return it
   referralLink: string;
   referrals: number;
   rank: number;
@@ -47,8 +47,7 @@ const Particle = ({
 
 const Dashboard = () => {
   /* ---- MAGIC LINK FRIENDLY ---- */
-  const referralCode =
-    new URLSearchParams(window.location.search).get('code') || '';
+  const referralCode = new URLSearchParams(window.location.search).get('code') || '';
 
   /* ---- STATE ---- */
   const [userData, setUserData] = useState<UserData>({
@@ -130,19 +129,26 @@ const Dashboard = () => {
 
   /* ---- COPY ---- */
   const copyLink = () => {
-    navigator.clipboard.writeText(userData.referralLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (userData.referralLink) {
+      navigator.clipboard.writeText(userData.referralLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   /* ---- SHARE ---- */
   const shareLink = async () => {
-    if (navigator.share) {
-      await navigator.share({
-        title: 'Join ServeQrew',
-        text: 'Join me on ServeQrew!',
-        url: userData.referralLink,
-      });
+    if (navigator.share && userData.referralLink) {
+      try {
+        await navigator.share({
+          title: 'Join ServeQrew',
+          text: 'Join me on ServeQrew!',
+          url: userData.referralLink,
+        });
+      } catch (err) {
+        console.error('Share failed:', err);
+        copyLink(); // fallback copy
+      }
     } else {
       copyLink();
     }
@@ -160,7 +166,7 @@ const Dashboard = () => {
   /* ================= UI ================= */
 
   return (
-    <div className="min-h-screen relative bg-gradient-to-b from-white via-white to-gray-50 overflow-hidden text-gray-900">
+    <div className="min-h-screen relative bg-gradient-to-b from-white via-white to-gray-50 overflow-hidden text-gray-900 font-sans">
       {/* PARTICLES */}
       {particles.map((p, i) => <Particle key={i} {...p} />)}
 
@@ -184,9 +190,9 @@ const Dashboard = () => {
           className="bg-gradient-to-r from-teal-100 to-lime-100 p-10 rounded-3xl shadow-xl text-center max-w-xl w-full"
         >
           <h1 className="text-4xl font-black italic uppercase mb-2">
-            Welcome, {userData.name.split(' ')[0]}
+            Welcome{userData.name ? `, ${userData.name.split(' ')[0]}` : ''}!
           </h1>
-          <p className="opacity-70">{userData.email}</p>
+          <p className="opacity-70">{userData.email || '-'}</p>
         </motion.div>
       </section>
 
@@ -217,12 +223,13 @@ const Dashboard = () => {
               value={userData.referralLink}
               className="flex-1 px-3 py-2 border rounded-xl text-xs font-mono"
             />
-            <button onClick={copyLink} className="px-4 py-2 border rounded-xl">
+            <button onClick={copyLink} className="px-4 py-2 border rounded-xl flex items-center gap-1">
               <Copy className="w-4 h-4" />
-              {copied && <span className="ml-1 text-xs">Copied</span>}
+              {copied && <span className="text-xs">Copied</span>}
             </button>
-            <button onClick={shareLink} className="px-4 py-2 bg-teal-500 text-white rounded-xl">
+            <button onClick={shareLink} className="px-4 py-2 bg-teal-500 text-white rounded-xl flex items-center gap-1">
               <Share2 className="w-4 h-4" />
+              <span className="text-xs">Share</span>
             </button>
           </div>
 
