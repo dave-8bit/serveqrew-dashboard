@@ -82,20 +82,21 @@ const Dashboard = () => {
 
   /* ---- FETCH DASHBOARD DATA ---- */
   useEffect(() => {
+    if (!referralCode) return;
     let isMounted = true;
 
     const fetchDashboardData = async () => {
       try {
-        const res = await fetch(
-          `https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/dashboard?code=${referralCode}`,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
-              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-            },
-          }
-        );
+        // FIX: Added ?apikey= to the URL to bypass browser CORS header blocks
+        const url = `https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker/dashboard?code=${referralCode}&apikey=${import.meta.env.VITE_SUPABASE_ANON_KEY}`;
+        
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+        });
 
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -157,9 +158,11 @@ const Dashboard = () => {
   /* ---- LOADING ---- */
   if (loading) {
     return (
-      <p className="text-center mt-24 font-black uppercase italic tracking-widest animate-pulse text-teal-600">
-        Loading your dashboard…
-      </p>
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="font-black uppercase italic tracking-widest animate-pulse text-teal-600">
+          Loading your dashboard…
+        </p>
+      </div>
     );
   }
 
@@ -176,7 +179,7 @@ const Dashboard = () => {
           <img src={logo} className="w-12 h-12 rounded-xl" />
           <span className="font-black italic text-xl">ServeQrew Dashboard</span>
         </div>
-        <a href="/" className="flex items-center gap-2 border px-4 py-2 rounded-xl">
+        <a href="/" className="flex items-center gap-2 border px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors">
           <Home className="w-5 h-5" />
           Home
         </a>
@@ -199,12 +202,12 @@ const Dashboard = () => {
       {/* STATS */}
       <section className="flex justify-center px-6 mt-8">
         <div className="grid grid-cols-2 gap-6 max-w-xl w-full">
-          <div className="bg-white rounded-3xl p-6 shadow text-center">
+          <div className="bg-white rounded-3xl p-6 shadow text-center border border-gray-100">
             <Users className="mx-auto mb-2 text-teal-500" />
             <p className="text-3xl font-black">{userData.referrals}</p>
             <p className="text-xs uppercase opacity-60">Referrals</p>
           </div>
-          <div className="bg-white rounded-3xl p-6 shadow text-center">
+          <div className="bg-white rounded-3xl p-6 shadow text-center border border-gray-100">
             <Trophy className="mx-auto mb-2 text-lime-500" />
             <p className="text-3xl font-black">#{userData.rank || '-'}</p>
             <p className="text-xs uppercase opacity-60">Rank</p>
@@ -214,41 +217,43 @@ const Dashboard = () => {
 
       {/* REFERRAL */}
       <section className="flex justify-center px-6 mt-10">
-        <div className="bg-white rounded-3xl p-8 shadow max-w-xl w-full">
+        <div className="bg-white rounded-3xl p-8 shadow max-w-xl w-full border border-gray-100">
           <h2 className="font-black italic uppercase mb-4">Your Referral Link</h2>
 
           <div className="flex gap-2 mb-4">
             <input
               readOnly
               value={userData.referralLink}
-              className="flex-1 px-3 py-2 border rounded-xl text-xs font-mono"
+              className="flex-1 px-3 py-2 border rounded-xl text-xs font-mono bg-gray-50"
             />
-            <button onClick={copyLink} className="px-4 py-2 border rounded-xl flex items-center gap-1">
+            <button onClick={copyLink} className="px-4 py-2 border rounded-xl flex items-center gap-1 hover:bg-gray-50 active:scale-95 transition-all">
               <Copy className="w-4 h-4" />
-              {copied && <span className="text-xs">Copied</span>}
+              {copied && <span className="text-xs font-bold text-teal-600">Copied</span>}
             </button>
-            <button onClick={shareLink} className="px-4 py-2 bg-teal-500 text-white rounded-xl flex items-center gap-1">
+            <button onClick={shareLink} className="px-4 py-2 bg-teal-500 text-white rounded-xl flex items-center gap-1 hover:bg-teal-600 active:scale-95 transition-all">
               <Share2 className="w-4 h-4" />
-              <span className="text-xs">Share</span>
+              <span className="text-xs font-bold">Share</span>
             </button>
           </div>
 
-          <h3 className="flex items-center gap-2 font-bold uppercase text-sm">
+          <h3 className="flex items-center gap-2 font-bold uppercase text-sm mt-6 mb-2">
             <Sparkles className="w-4 h-4 text-teal-500" />
             Your Referrals
           </h3>
 
           {userData.referralList.length ? (
-            <ul className="mt-2 text-xs">
-              {userData.referralList.map((r, i) => (
-                <li key={i} className="flex justify-between py-1 border-b">
-                  <span>{r.name}</span>
-                  <span className="opacity-50">{r.email}</span>
-                </li>
-              ))}
-            </ul>
+            <div className="max-h-60 overflow-y-auto">
+                <ul className="text-xs">
+                {userData.referralList.map((r, i) => (
+                    <li key={i} className="flex justify-between py-2 border-b last:border-0">
+                    <span className="font-bold">{r.name}</span>
+                    <span className="opacity-50">{r.email}</span>
+                    </li>
+                ))}
+                </ul>
+            </div>
           ) : (
-            <p className="opacity-50 text-sm mt-2">No referrals yet</p>
+            <p className="opacity-50 text-sm mt-2 italic">No referrals yet. Start sharing!</p>
           )}
         </div>
       </section>
